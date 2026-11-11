@@ -2,9 +2,11 @@ import Link from "next/link";
 import { ViewFrame } from "@/components/Shell";
 import { ContextRail } from "@/components/ContextRail";
 import { PageHead, Crumbs } from "@/components/ui";
-import { themes } from "@/data/mock";
+import { themes as mockThemes } from "@/data/mock";
+import { api } from "@/lib/api";
 
-export default function Themes() {
+export default async function Themes() {
+  const themes = (await api.themes()) ?? mockThemes;
   const rows = [...themes].sort((a, b) => b.heat - a.heat);
   const rail = <ContextRail scopeLabel="Themes" suggestions={["Hottest theme this week", "Which companies lead Quantum?", "Emerging themes by event velocity"]} />;
 
@@ -21,7 +23,7 @@ export default function Themes() {
               <span className="text-[16px] font-extrabold">{t.heat}</span>
             </div>
             <div className="h-[5px] bg-line rounded overflow-hidden"><div className="h-full bg-theme/80" style={{ width: `${t.heat}%` }} /></div>
-            <div className="text-[11px] text-muted mt-2">{t.eventsToday} events today · trending</div>
+            <div className="text-[11px] text-muted mt-2">{t.eventsToday} event{t.eventsToday === 1 ? "" : "s"} today</div>
           </Link>
         ))}
       </div>

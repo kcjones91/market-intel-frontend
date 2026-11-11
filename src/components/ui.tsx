@@ -68,30 +68,37 @@ export function Spark({ data }: { data: number[] }) {
 const scoreColor = (p: IntelEvent["priority"]) =>
   p === "high" ? "text-neg" : p === "med" ? "text-amber" : "text-muted";
 
+// The whole card is clickable, but it is not itself a link: the title link is
+// stretched over the card with ::after, and the tag links sit above it. The
+// previous version wrapped the card in a link with tag links inside it, which
+// is invalid HTML (a link inside a link) and made React throw a hydration
+// error and re-render the page on every load.
 export function EventCard({ ev }: { ev: IntelEvent }) {
   return (
-    <Link
-      href={`/event/${ev.id}`}
-      className="block relative bg-card border border-line rounded-[9px] px-4 py-[15px] mb-3 hover:border-[#333] transition-colors"
-    >
+    <div className="relative bg-card border border-line rounded-[9px] px-4 py-[15px] mb-3 hover:border-[#333] transition-colors">
       <div className="text-[10px] tracking-wide text-muted uppercase">
         <span className="text-sub">{ev.sourceLabel}</span> · {ev.docType}
       </div>
-      <div className="font-sans text-[15px] font-semibold my-[7px] leading-snug max-w-[88%]">{ev.title}</div>
+      <Link
+        href={`/event/${ev.id}`}
+        className="block font-sans text-[15px] font-semibold my-[7px] leading-snug max-w-[88%] after:absolute after:inset-0 after:content-['']"
+      >
+        {ev.title}
+      </Link>
       <div className="font-sans text-[12.5px] text-sub leading-relaxed max-w-[92%]">{ev.summary}</div>
 
-      <div className="absolute top-[14px] right-4 text-right">
+      <div className="absolute top-[14px] right-4 text-right pointer-events-none">
         <div className={cn("text-[19px] font-extrabold leading-none", scoreColor(ev.priority))}>{ev.importance}</div>
         <div className="text-[9px] tracking-wide text-faint mt-0.5">IMPORTANCE</div>
       </div>
 
       <div className="flex items-center justify-between mt-3">
-        <div className="flex gap-1.5 flex-wrap">
+        <div className="relative z-10 flex gap-1.5 flex-wrap">
           {ev.entities.filter(e => e.kind === "company").map(e => <TickerTag key={e.id} id={e.id} label={e.label} />)}
           {ev.themes.map(t => <ThemeTag key={t} id={t} label={t.toUpperCase()} />)}
         </div>
         <div className="text-[10.5px] text-faint whitespace-nowrap">{ev.time} · conf {ev.confidence}</div>
       </div>
-    </Link>
+    </div>
   );
 }

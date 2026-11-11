@@ -3,15 +3,22 @@ import Link from "next/link";
 import { ViewFrame } from "@/components/Shell";
 import { ContextRail } from "@/components/ContextRail";
 import { Crumbs, ThemeTag } from "@/components/ui";
-import { govbodies, govById, companyById, events } from "@/data/mock";
+import { govById, companies as mockCompanies, events as mockEvents } from "@/data/mock";
+import { api, allEvents } from "@/lib/api";
 
-export function generateStaticParams() {
-  return govbodies.map((g) => ({ id: g.id }));
-}
+// The backend has no /api/government/{id} endpoint, so the record comes from
+// the list, and related events come from today's feed.
+export default async function GovView({ params }: { params: { id: string } }) {
+  const id = decodeURIComponent(params.id);
+  const [list, cos, today] = await Promise.all([api.government(), api.companies(), api.today()]);
+  const live = list !== null;
 
-export default function GovView({ params }: { params: { id: string } }) {
-  const g = govById(params.id);
+  const g = live ? list.find((x) => x.id === id) : govById(id);
   if (!g) notFound();
+
+  const companies = live ? cos ?? [] : mockCompanies;
+  const events = live ? allEvents(today) : mockEvents;
+  const byId = new Map(companies.map((c) => [c.id, c]));
 
   const related = events.filter((e) => e.entities.some((en) => en.kind === "govbody" && en.id === g.id));
   const rail = <ContextRail scopeLabel={g.ref} suggestions={["Which companies benefit most?", "Similar past legislation", "Timeline to next milestone"]} />;
@@ -28,9 +35,9 @@ export default function GovView({ params }: { params: { id: string } }) {
 
           <div className="text-[11px] tracking-[0.15em] text-sub uppercase mt-[22px] mb-3 border-t border-line pt-[18px]">Affected Companies</div>
           <div className="flex gap-1.5 flex-wrap">
-            {g.affects.length ? g.affects.map((id) => {
-              const c = companyById(id);
-              return c ? <Link key={id} href={`/companies/${id}`} className="text-[11px] font-bold px-2.5 py-1 rounded border border-pos/40 bg-pos/[0.06] text-pos hover:bg-pos/15">{c.ticker}</Link> : null;
+            {g.affects.length ? g.affects.map((cid) => {
+              const c = byId.get(cid);
+              return <Link key={cid} href={`/companies/${cid}`} className="text-[11px] font-bold px-2.5 py-1 rounded border border-pos/40 bg-pos/[0.06] text-pos hover:bg-pos/15">{c?.ticker ?? c?.name ?? cid.toUpperCase()}</Link>;
             }) : <span className="text-[11px] text-muted">No direct corporate exposure tagged.</span>}
           </div>
 

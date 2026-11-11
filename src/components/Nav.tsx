@@ -5,15 +5,17 @@ import { cn } from "@/lib/cn";
 
 type Item = { href: string; label: string; count?: number; alert?: boolean; soon?: boolean };
 
+// Counts are optional. The old hardcoded sample counts (14, 6, 3, 3) were
+// removed so the nav never shows numbers that do not come from live data.
 const PRIMARY: Item[] = [
-  { href: "/", label: "Dashboard", count: 14 },
-  { href: "/watchlist", label: "Watchlist", count: 6 },
+  { href: "/", label: "Dashboard" },
+  { href: "/watchlist", label: "Watchlist" },
   { href: "/companies", label: "Companies" },
   { href: "/themes", label: "Themes" },
-  { href: "/government", label: "Government", count: 3 },
+  { href: "/government", label: "Government" },
   { href: "/graph", label: "Graph" },
   { href: "/search", label: "Search" },
-  { href: "/alerts", label: "Alerts", count: 3, alert: true },
+  { href: "/alerts", label: "Alerts" },
   { href: "/reports", label: "Reports", soon: true },
   { href: "/world", label: "World Events", soon: true },
 ];

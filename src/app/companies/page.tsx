@@ -2,9 +2,11 @@ import Link from "next/link";
 import { ViewFrame } from "@/components/Shell";
 import { ContextRail } from "@/components/ContextRail";
 import { PageHead, Crumbs } from "@/components/ui";
-import { companies } from "@/data/mock";
+import { companies as mockCompanies } from "@/data/mock";
+import { api } from "@/lib/api";
 
-export default function Companies() {
+export default async function Companies() {
+  const companies = (await api.companies()) ?? mockCompanies;
   const rows = [...companies].sort((a, b) => b.heat - a.heat);
   const rail = <ContextRail scopeLabel="Companies" suggestions={["Companies with rising government activity", "Highest-heat names not on my watchlist", "Quantum pure-plays only"]} />;
 
@@ -20,7 +22,7 @@ export default function Companies() {
           </div>
           {rows.map((c) => (
             <Link key={c.id} href={`/companies/${c.id}`} className="grid grid-cols-[1.4fr_1fr_70px_70px_60px] items-center px-4 py-3 border-b border-linesoft last:border-0 hover:bg-cardhi">
-              <span><span className="text-[13px] font-bold">{c.ticker}</span> <span className="text-[11px] text-muted ml-1.5">{c.name}</span></span>
+              <span><span className="text-[13px] font-bold">{c.ticker ?? c.name}</span> {c.ticker && <span className="text-[11px] text-muted ml-1.5">{c.name}</span>}</span>
               <span className="text-[11px] text-sub">{c.sector}</span>
               <span className="text-right text-[13px] font-bold" style={{ color: c.heat >= 80 ? "#22c55e" : c.heat >= 60 ? "#f59e0b" : "#8a8a8a" }}>{c.heat}</span>
               <span className="text-right text-[12px] text-sub">{c.eventsToday}</span>

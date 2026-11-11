@@ -1,9 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ViewFrame } from "@/components/Shell";
 import { ContextRail } from "@/components/ContextRail";
 import { Crumbs, PageHead, EventCard } from "@/components/ui";
-import { events } from "@/data/mock";
+import { events as mockEvents } from "@/data/mock";
+import { api } from "@/lib/api";
+import type { IntelEvent } from "@/lib/types";
 
 const EXAMPLES = [
   "quantum legislation",
@@ -12,12 +14,33 @@ const EXAMPLES = [
   "hiring signal",
 ];
 
+// Used only when no API is configured.
+function searchMock(norm: string): IntelEvent[] {
+  return norm
+    ? mockEvents.filter((e) => (e.title + e.summary + e.companies.join() + e.themes.join() + e.sourceLabel).toLowerCase().includes(norm))
+    : mockEvents;
+}
+
 export default function Search() {
   const [q, setQ] = useState("");
+  const [results, setResults] = useState<IntelEvent[] | null>(null);   // null = loading
+  const [failed, setFailed] = useState(false);
   const norm = q.trim().toLowerCase();
-  const results = norm
-    ? events.filter((e) => (e.title + e.summary + e.companies.join() + e.themes.join() + e.sourceLabel).toLowerCase().includes(norm))
-    : events;
+
+  useEffect(() => {
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        const data = await api.search(q.trim());
+        if (cancelled) return;
+        setFailed(false);
+        setResults(data ?? searchMock(norm));     // null = no API configured
+      } catch {
+        if (!cancelled) { setFailed(true); setResults([]); }
+      }
+    }, 250);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [q, norm]);
 
   const rail = <ContextRail scopeLabel="Search" suggestions={["All quantum legislation, last 90 days", "Companies with increasing gov activity", "Agencies interacting with IonQ"]} />;
 
@@ -40,8 +63,17 @@ export default function Search() {
             <button key={x} onClick={() => setQ(x)} className="text-[11px] text-info border border-info/30 rounded px-2.5 py-1 hover:bg-info/10">{x}</button>
           ))}
         </div>
-        <div className="text-[10px] tracking-wide text-faint uppercase mb-3">{results.length} result{results.length === 1 ? "" : "s"}</div>
-        {results.length ? results.map((e) => <EventCard key={e.id} ev={e} />) : <div className="text-muted text-[12.5px] py-10 text-center">No matches. Try a broader term.</div>}
+
+        {failed ? (
+          <div className="text-neg text-[12.5px] py-10 text-center">Intel API unavailable. Search could not run.</div>
+        ) : results === null ? (
+          <div className="text-muted text-[12.5px] py-10 text-center">Searching…</div>
+        ) : (
+          <>
+            <div className="text-[10px] tracking-wide text-faint uppercase mb-3">{results.length} result{results.length === 1 ? "" : "s"}</div>
+            {results.length ? results.map((e) => <EventCard key={e.id} ev={e} />) : <div className="text-muted text-[12.5px] py-10 text-center">No matches. Try a broader term.</div>}
+          </>
+        )}
       </div>
     </ViewFrame>
   );

@@ -1,47 +1,125 @@
-// API client. When NEXT_PUBLIC_API_URL is set, views fetch from the backend.
-// When it's unset (or a fetch fails), they fall back to the bundled mock data,
-// so the frontend always runs standalone.
+// API client.
+//
+// Server components call the backend directly, using API_INTERNAL_URL (read at
+// runtime, e.g. the in-cluster Service address). NEXT_PUBLIC_API_URL is still
+// honored as a fallback so local dev with .env.local keeps working.
+//
+// Browser code never talks to the backend directly. It calls same-origin
+// /api/*, which src/app/api/[...path]/route.ts forwards to the backend. That
+// way no backend address is baked into the bundle and nothing breaks when the
+// app is opened from outside the LAN.
+//
+// Return contract for every call:
+//   data  -> the API answered
+//   null  -> no API is configured (standalone mock mode), or the API said 404
+//   throw -> an API is configured but failed. Views must NOT fall back to mock
+//            data in that case: showing sample data as if it were live is
+//            worse than showing an error.
 
-const BASE = process.env.NEXT_PUBLIC_API_URL;
+import type {
+  Company, Theme, GovBody, IntelEvent, GraphNode, Edge, AlertRule, TriggeredAlert,
+} from "@/lib/types";
 
-export const usingApi = Boolean(BASE);
+export interface Quote { sym: string; px: string; chg: string; d: number }
+export interface DashboardData {
+  date: string;
+  stamp: string;
+  ingestSummary: string;
+  quotes: Quote[];
+  high: IntelEvent[];
+  med: IntelEvent[];
+  low: IntelEvent[];
+}
+export interface CompanyDetail { company: Company; timeline: IntelEvent[]; government: GovBody[] }
+export interface ThemeDetail { theme: Theme; companies: Company[]; government: GovBody[]; events: IntelEvent[] }
+export interface EventDetail { event: IntelEvent; related: IntelEvent[] }
+export interface GraphData { nodes: GraphNode[]; edges: Edge[] }
+export interface AlertsData { triggered: TriggeredAlert[]; rules: AlertRule[] }
 
-async function get<T>(path: string): Promise<T | null> {
-  if (!BASE) return null;
-  try {
-    const res = await fetch(`${BASE}${path}`, { cache: "no-store" });
-    if (!res.ok) return null;
-    return (await res.json()) as T;
-  } catch {
-    return null;
+export class ApiError extends Error {
+  constructor(message: string, public status?: number) {
+    super(message);
+    this.name = "ApiError";
   }
 }
 
-async function post<T>(path: string, body: unknown): Promise<T | null> {
-  if (!BASE) return null;
-  try {
-    const res = await fetch(`${BASE}${path}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-      cache: "no-store",
-    });
-    if (!res.ok) return null;
-    return (await res.json()) as T;
-  } catch {
-    return null;
+const isServer = typeof window === "undefined";
+
+const SERVER_BASE = (process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
+
+/** True when a backend is configured. Only meaningful in server components. */
+export const apiEnabled = Boolean(SERVER_BASE);
+
+async function request<T>(path: string, init?: RequestInit): Promise<T | null> {
+  let url: string;
+  if (isServer) {
+    if (!SERVER_BASE) return null;          // mock mode
+    url = `${SERVER_BASE}${path}`;
+  } else {
+    url = path;                             // same-origin, proxied
   }
+
+  let res: Response;
+  try {
+    res = await fetch(url, { ...init, cache: "no-store" });
+  } catch {
+    throw new ApiError(`API unreachable: ${path}`);
+  }
+  if (res.status === 404) return null;
+  if (!isServer && res.status === 501) return null;   // proxy reports: no API configured
+  if (!res.ok) throw new ApiError(`API error ${res.status}: ${path}`, res.status);
+  return (await res.json()) as T;
 }
+
+const get = <T,>(path: string) => request<T>(path);
+const post = <T,>(path: string, body: unknown) =>
+  request<T>(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+const enc = encodeURIComponent;
 
 export const api = {
-  today: () => get<any>("/api/today"),
-  companies: () => get<any[]>("/api/companies"),
-  company: (id: string) => get<any>(`/api/companies/${id}`),
-  themes: () => get<any[]>("/api/themes"),
-  theme: (id: string) => get<any>(`/api/themes/${id}`),
-  government: () => get<any[]>("/api/government"),
-  event: (id: string) => get<any>(`/api/events/${id}`),
-  graph: () => get<any>("/api/graph"),
-  search: (q: string) => post<any[]>("/api/search", { q, limit: 20 }),
-  alerts: () => get<any>("/api/alerts"),
+  today: () => get<DashboardData>("/api/today"),
+  companies: () => get<Company[]>("/api/companies"),
+  company: (id: string) => get<CompanyDetail>(`/api/companies/${enc(id)}`),
+  themes: () => get<Theme[]>("/api/themes"),
+  theme: (id: string) => get<ThemeDetail>(`/api/themes/${enc(id)}`),
+  government: () => get<GovBody[]>("/api/government"),
+  event: (id: string) => get<EventDetail>(`/api/events/${enc(id)}`),
+  graph: () => get<GraphData>("/api/graph"),
+  search: (q: string) => post<IntelEvent[]>("/api/search", { q, limit: 20 }),
+
+  // /api/alerts has no response_model on the backend, so its exact key names
+  // are not pinned by a schema. Accept the likely spellings and normalize.
+  alerts: async (): Promise<AlertsData | null> => {
+    const raw = await get<any>("/api/alerts");
+    if (!raw) return null;
+    const fired: any[] = raw.triggered ?? raw.fired ?? raw.triggeredAlerts ?? raw.triggered_alerts ?? [];
+    const rules: any[] = raw.rules ?? raw.alertRules ?? raw.alert_rules ?? [];
+    return {
+      triggered: fired.map((a) => ({
+        id: String(a.id),
+        ruleName: a.ruleName ?? a.rule_name ?? "",
+        hit: a.hit ?? "",
+        ref: a.ref ?? undefined,
+        time: a.time ?? "",
+      })),
+      rules: rules.map((r) => ({
+        id: String(r.id),
+        name: r.name ?? "",
+        scopeKind: r.scopeKind ?? r.scope_kind,
+        scopeValue: r.scopeValue ?? r.scope_value ?? "",
+        channels: r.channels ?? [],
+        enabled: Boolean(r.enabled),
+      })),
+    };
+  },
 };
+
+/** All of today's events in one list (high, then med, then low). */
+export function allEvents(d: DashboardData | null): IntelEvent[] {
+  return d ? [...d.high, ...d.med, ...d.low] : [];
+}

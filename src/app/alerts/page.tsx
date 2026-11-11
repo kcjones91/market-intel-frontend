@@ -2,11 +2,16 @@ import Link from "next/link";
 import { ViewFrame } from "@/components/Shell";
 import { ContextRail } from "@/components/ContextRail";
 import { Crumbs, PageHead } from "@/components/ui";
-import { triggeredAlerts, alertRules } from "@/data/mock";
+import { triggeredAlerts as mockTriggered, alertRules as mockRules } from "@/data/mock";
+import { api } from "@/lib/api";
 
 const channelColor: Record<string, string> = { discord: "#5865F2", slack: "#36C5F0", email: "#8a8a8a", telegram: "#229ED9" };
 
-export default function Alerts() {
+export default async function Alerts() {
+  const data = await api.alerts();
+  const triggeredAlerts = data ? data.triggered : mockTriggered;
+  const alertRules = data ? data.rules : mockRules;
+
   const rail = <ContextRail scopeLabel="Alerts" suggestions={["Why did this rule fire?", "Suggest a rule for quantum funding", "Mute low-signal alerts"]} />;
 
   return (
@@ -16,8 +21,10 @@ export default function Alerts() {
         <PageHead title="Alerts" stamp={`${triggeredAlerts.length} FIRED TODAY`} />
 
         <div className="text-[11px] tracking-[0.15em] text-sub uppercase mt-5 mb-3">Triggered</div>
+        {triggeredAlerts.length === 0 && <div className="text-muted text-[12.5px] py-6 text-center">No alerts have fired today.</div>}
         {triggeredAlerts.map((a) => {
-          const href = a.ref ? (a.ref.kind === "event" ? `/event/${a.ref.id}` : a.ref.kind === "theme" ? `/themes/${a.ref.id}` : `/companies/${a.ref.id}`) : "#";
+          const rid = a.ref ? encodeURIComponent(a.ref.id) : "";
+          const href = a.ref ? (a.ref.kind === "event" ? `/event/${rid}` : a.ref.kind === "theme" ? `/themes/${rid}` : `/companies/${rid}`) : "#";
           return (
             <Link key={a.id} href={href} className="flex justify-between items-center bg-card border border-line rounded-[9px] px-4 py-3 mb-2.5 hover:border-[#333]">
               <div>
@@ -30,6 +37,7 @@ export default function Alerts() {
         })}
 
         <div className="text-[11px] tracking-[0.15em] text-sub uppercase mt-7 mb-3 border-t border-line pt-[18px]">Rules</div>
+        {alertRules.length === 0 && <div className="text-muted text-[12.5px] py-6 text-center">No alert rules defined.</div>}
         {alertRules.map((r) => (
           <div key={r.id} className="flex justify-between items-center bg-card border border-line rounded-[9px] px-4 py-3 mb-2.5">
             <div>
@@ -39,7 +47,7 @@ export default function Alerts() {
             <div className="flex items-center gap-3">
               <div className="flex gap-1.5">
                 {r.channels.map((ch) => (
-                  <span key={ch} className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase" style={{ color: channelColor[ch], border: `1px solid ${channelColor[ch]}40` }}>{ch}</span>
+                  <span key={ch} className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase" style={{ color: channelColor[ch] ?? "#8a8a8a", border: `1px solid ${channelColor[ch] ?? "#8a8a8a"}40` }}>{ch}</span>
                 ))}
               </div>
               <span className="text-[10px]" style={{ color: r.enabled ? "#00ff88" : "#444" }}>{r.enabled ? "ON" : "OFF"}</span>

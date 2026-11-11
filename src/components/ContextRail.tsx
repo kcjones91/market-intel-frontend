@@ -1,7 +1,10 @@
 "use client";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { companies, themes } from "@/data/mock";
+import { companies as mockCompanies, themes as mockThemes } from "@/data/mock";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import type { Company, Theme } from "@/lib/types";
 
 function heatColor(h: number) {
   if (h >= 80) return "text-pos";
@@ -16,6 +19,12 @@ function heatIcon(h: number) {
   return "·";
 }
 
+type RailData = { companies: Company[]; themes: Theme[] };
+
+// The rail remounts on every navigation. Keep the last answer so it does not
+// flash a loading state on each page, then refresh it in the background.
+let cache: RailData | null = null;
+
 export function ContextRail({
   scopeLabel = "Dashboard",
   suggestions = [
@@ -27,14 +36,37 @@ export function ContextRail({
   scopeLabel?: string;
   suggestions?: string[];
 }) {
-  const watched = companies.filter((c) => c.watched).sort((a, b) => b.heat - a.heat);
-  const heatThemes = [...themes].sort((a, b) => b.heat - a.heat).slice(0, 5);
+  const [data, setData] = useState<RailData | null>(cache);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [cos, ths] = await Promise.all([api.companies(), api.themes()]);
+        // null = no API configured, so use the bundled mock data.
+        const next: RailData = { companies: cos ?? mockCompanies, themes: ths ?? mockThemes };
+        cache = next;
+        if (!cancelled) { setData(next); setFailed(false); }
+      } catch {
+        if (!cancelled) setFailed(true);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const watched = (data?.companies ?? []).filter((c) => c.watched).sort((a, b) => b.heat - a.heat);
+  const heatThemes = [...(data?.themes ?? [])].sort((a, b) => b.heat - a.heat).slice(0, 5);
 
   return (
     <aside className="border-l border-line h-screen sticky top-0 overflow-y-auto pane px-[18px] py-5">
       <div className="flex gap-4 text-[10px] tracking-[0.15em] text-faint uppercase mb-4">
         <span className="text-sub">Watchlist</span><span>Heat</span>
       </div>
+
+      {!data && !failed && <div className="text-[11px] text-faint py-2">Loading…</div>}
+      {!data && failed && <div className="text-[11px] text-neg py-2">Intel API unavailable.</div>}
+      {data && watched.length === 0 && <div className="text-[11px] text-faint py-2">No watched companies.</div>}
 
       {watched.map((c) => (
         <Link
@@ -43,7 +75,7 @@ export function ContextRail({
           className="flex items-center justify-between py-[9px] border-b border-linesoft last:border-0 group"
         >
           <div>
-            <div className="text-[13px] font-bold group-hover:text-mint">{c.ticker}</div>
+            <div className="text-[13px] font-bold group-hover:text-mint">{c.ticker ?? c.name}</div>
             <div className="text-[10px] text-muted mt-0.5">
               {c.eventsToday ? `${c.eventsToday} events today` : "no events"}
             </div>
@@ -60,7 +92,7 @@ export function ContextRail({
         </div>
         {heatThemes.map((t) => (
           <Link key={t.id} href={`/themes/${t.id}`} className="grid grid-cols-[60px_1fr_26px] items-center gap-2 mb-[9px] group">
-            <span className="text-[11.5px] text-sub group-hover:text-ink">{t.name}</span>
+            <span className="text-[11.5px] text-sub group-hover:text-ink truncate">{t.name}</span>
             <span className="h-1 bg-line rounded-sm overflow-hidden">
               <span className="block h-full bg-mint/85" style={{ width: `${t.heat}%` }} />
             </span>
@@ -81,7 +113,7 @@ export function ContextRail({
           ))}
         </div>
       </div>
-      <div className="text-[9.5px] text-faint mt-3">Local vLLM · Qwen2.5 · swipe-worker-3</div>
+      <div className="text-[9.5px] text-faint mt-3">Local vLLM · Qwen3.5 · swipe-lab</div>
     </aside>
   );
 }
