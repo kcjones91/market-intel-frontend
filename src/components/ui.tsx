@@ -1,0 +1,97 @@
+"use client";
+import Link from "next/link";
+import type { IntelEvent } from "@/lib/types";
+import { cn } from "@/lib/cn";
+
+export function Crumbs({ items }: { items: { href?: string; label: string }[] }) {
+  return (
+    <div className="flex items-center gap-[7px] text-[11px] text-muted mb-3">
+      {items.map((it, i) => {
+        const last = i === items.length - 1;
+        return (
+          <span key={i} className="flex items-center gap-[7px]">
+            {it.href && !last ? (
+              <Link href={it.href} className="hover:text-ink">{it.label}</Link>
+            ) : (
+              <span className={last ? "text-sub" : ""}>{it.label}</span>
+            )}
+            {!last && <span className="text-faint">/</span>}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+export function PageHead({ title, stamp }: { title: string; stamp?: string }) {
+  return (
+    <div className="flex items-baseline justify-between">
+      <h1 className="text-[18px] font-bold">{title}</h1>
+      {stamp && <div className="text-[11px] text-sub tracking-wide">{stamp}</div>}
+    </div>
+  );
+}
+
+export function TickerTag({ id, label }: { id: string; label: string }) {
+  return (
+    <Link
+      href={`/companies/${id}`}
+      onClick={(e) => e.stopPropagation()}
+      className="text-[10px] font-bold px-[7px] py-0.5 rounded border border-pos/40 bg-pos/[0.06] text-pos hover:bg-pos/15"
+    >
+      {label}
+    </Link>
+  );
+}
+export function ThemeTag({ id, label }: { id: string; label: string }) {
+  return (
+    <Link
+      href={`/themes/${id}`}
+      onClick={(e) => e.stopPropagation()}
+      className="text-[10px] font-bold px-[7px] py-0.5 rounded border border-theme/40 bg-theme/[0.06] text-theme hover:bg-theme/15"
+    >
+      {label}
+    </Link>
+  );
+}
+
+export function Spark({ data }: { data: number[] }) {
+  return (
+    <div className="flex items-end gap-[3px] h-9 mt-2">
+      {data.map((v, i) => (
+        <span key={i} className="flex-1 bg-mint/70 rounded-[1px]" style={{ height: `${Math.max(v, 4)}%`, minHeight: 2 }} />
+      ))}
+    </div>
+  );
+}
+
+const scoreColor = (p: IntelEvent["priority"]) =>
+  p === "high" ? "text-neg" : p === "med" ? "text-amber" : "text-muted";
+
+export function EventCard({ ev }: { ev: IntelEvent }) {
+  return (
+    <Link
+      href={`/event/${ev.id}`}
+      className="block relative bg-card border border-line rounded-[9px] px-4 py-[15px] mb-3 hover:border-[#333] transition-colors"
+    >
+      <div className="text-[10px] tracking-wide text-muted uppercase">
+        <span className="text-sub">{ev.sourceLabel}</span> · {ev.docType}
+      </div>
+      <div className="font-sans text-[15px] font-semibold my-[7px] leading-snug max-w-[88%]">{ev.title}</div>
+      <div className="font-sans text-[12.5px] text-sub leading-relaxed max-w-[92%]">{ev.summary}</div>
+
+      <div className="absolute top-[14px] right-4 text-right">
+        <div className={cn("text-[19px] font-extrabold leading-none", scoreColor(ev.priority))}>{ev.importance}</div>
+        <div className="text-[9px] tracking-wide text-faint mt-0.5">IMPORTANCE</div>
+      </div>
+
+      <div className="flex items-center justify-between mt-3">
+        <div className="flex gap-1.5 flex-wrap">
+          {ev.entities.filter(e => e.kind === "company").map(e => <TickerTag key={e.id} id={e.id} label={e.label} />)}
+          {ev.themes.map(t => <ThemeTag key={t} id={t} label={t.toUpperCase()} />)}
+        </div>
+        <div className="text-[10.5px] text-faint whitespace-nowrap">{ev.time} · conf {ev.confidence}</div>
+      </div>
+    </Link>
+  );
+}
