@@ -4,13 +4,13 @@ import { ContextRail } from "@/components/ContextRail";
 import { PageHead, Crumbs } from "@/components/ui";
 import { themes as mockThemes } from "@/data/mock";
 import { api } from "@/lib/api";
-import { heatVisible, byActivity } from "@/lib/heat";
+import { heatVisible, byActivity, byHeat } from "@/lib/heat";
 
 export default async function Themes() {
   const live = await api.themes();
   const themes = live ?? mockThemes;
   const showHeat = heatVisible(live !== null);
-  const rows = [...themes].sort(showHeat ? (a, b) => b.heat - a.heat : byActivity);
+  const rows = [...themes].sort(showHeat ? byHeat : byActivity);
   const rail = <ContextRail />;
 
   return (

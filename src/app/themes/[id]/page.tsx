@@ -5,7 +5,7 @@ import { ContextRail } from "@/components/ContextRail";
 import { Crumbs, Spark, EventCard } from "@/components/ui";
 import { themeById, events as mockEvents, companies as mockCompanies, govbodies as mockGov } from "@/data/mock";
 import { api, apiEnabled } from "@/lib/api";
-import { heatVisible, byActivity } from "@/lib/heat";
+import { heatVisible, byActivity, byHeat } from "@/lib/heat";
 import { Help } from "@/components/Help";
 
 export default async function ThemeView({ params }: { params: { id: string } }) {
@@ -18,7 +18,7 @@ export default async function ThemeView({ params }: { params: { id: string } }) 
 
   const showHeat = heatVisible(Boolean(data));
   const evs = data ? data.events : mockEvents.filter((e) => e.themes.includes(t.id));
-  const cos = [...(data ? data.companies : mockCompanies.filter((c) => c.themes.includes(t.id)))].sort(showHeat ? (a, b) => b.heat - a.heat : byActivity);
+  const cos = [...(data ? data.companies : mockCompanies.filter((c) => c.themes.includes(t.id)))].sort(showHeat ? byHeat : byActivity);
   const gov = data ? data.government : mockGov.filter((g) => g.themes.includes(t.id));
   const rail = <ContextRail />;
 
@@ -31,7 +31,7 @@ export default async function ThemeView({ params }: { params: { id: string } }) 
           <div>
             <div className="text-[26px] font-extrabold text-theme">{t.name}</div>
             <div className="text-[12px] text-muted mt-0.5">{t.eventsToday} event{t.eventsToday === 1 ? "" : "s"} today{showHeat ? ` · ${t.heat} / 100 heat` : ""}</div>
-            {showHeat && <Spark data={t.heatTrend} />}
+            {showHeat && t.heatTrend?.length > 1 && <><Spark data={t.heatTrend} /><div className="text-[12px] text-muted mt-1">Daily heat, last {t.heatTrend.length} days</div></>}
           </div>
           {showHeat && (
             <div className="text-right">

@@ -4,16 +4,9 @@ import Link from "next/link";
 import { companies as mockCompanies, themes as mockThemes } from "@/data/mock";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
-import { heatVisible, byActivity } from "@/lib/heat";
+import { heatVisible, heatTone, byActivity, byHeat } from "@/lib/heat";
 import { Help } from "@/components/Help";
 import type { Company, Theme } from "@/lib/types";
-
-function heatColor(h: number) {
-  if (h >= 80) return "text-pos";
-  if (h >= 60) return "text-amber";
-  if (h >= 40) return "text-sub";
-  return "text-muted";
-}
 
 type RailData = { companies: Company[]; themes: Theme[]; live: boolean };
 
@@ -52,10 +45,10 @@ export function ContextRail() {
     return () => { cancelled = true; mq.removeEventListener("change", load); };
   }, []);
 
-  // Live heat is not calculated yet (see lib/heat.ts): without it the panel lists by events today.
+  // Where heat is not shown (see lib/heat.ts) the panel lists by events today.
   const showHeat = heatVisible(data?.live ?? true);
-  const watched = (data?.companies ?? []).filter((c) => c.watched).sort(showHeat ? (a, b) => b.heat - a.heat : byActivity);
-  const heatThemes = [...(data?.themes ?? [])].sort(showHeat ? (a, b) => b.heat - a.heat : byActivity).slice(0, 5);
+  const watched = (data?.companies ?? []).filter((c) => c.watched).sort(showHeat ? byHeat : byActivity);
+  const heatThemes = [...(data?.themes ?? [])].sort(showHeat ? byHeat : byActivity).slice(0, 5);
 
   return (
     <aside className="hidden lg:block border-l border-line h-screen sticky top-0 overflow-y-auto pane px-[18px] py-5">
@@ -77,7 +70,7 @@ export function ContextRail() {
               {c.eventsToday ? `${c.eventsToday} event${c.eventsToday === 1 ? "" : "s"} today` : "no events today"}
             </div>
           </div>
-          {showHeat && <div className={cn("text-[13px] font-bold tabular-nums", heatColor(c.heat))}>{c.heat}</div>}
+          {showHeat && <div className={cn("text-[13px] font-bold tabular-nums", heatTone(c.heat))}>{c.heat}</div>}
         </Link>
       ))}
 

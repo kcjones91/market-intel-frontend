@@ -56,6 +56,8 @@ export function ThemeTag({ id, label }: { id: string; label: string }) {
 }
 
 export function Spark({ data }: { data: number[] }) {
+  // Nothing validates the API response, and a name added since the last heat run has no trend yet.
+  if (!data?.length) return null;
   return (
     <div className="flex items-end gap-[3px] h-9 mt-2">
       {data.map((v, i) => (
