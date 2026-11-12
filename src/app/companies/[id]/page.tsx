@@ -4,6 +4,8 @@ import { ContextRail } from "@/components/ContextRail";
 import { Crumbs, Spark, EventCard } from "@/components/ui";
 import { companyById, events as mockEvents, govbodies as mockGov } from "@/data/mock";
 import { api, apiEnabled } from "@/lib/api";
+import { heatVisible } from "@/lib/heat";
+import { Help } from "@/components/Help";
 
 export default async function CompanyView({ params }: { params: { id: string } }) {
   const id = decodeURIComponent(params.id);
@@ -16,6 +18,7 @@ export default async function CompanyView({ params }: { params: { id: string } }
   const evs = data ? data.timeline : mockEvents.filter((e) => e.companies.includes(c.id));
   const gov = data ? data.government : mockGov.filter((g) => g.affects.includes(c.id));
   const label = c.ticker ?? c.name;
+  const showHeat = heatVisible(Boolean(data));
   const rail = <ContextRail />;
 
   return (
@@ -27,12 +30,19 @@ export default async function CompanyView({ params }: { params: { id: string } }
           <div>
             <div className="text-[26px] font-extrabold">{label}</div>
             <div className="text-[12px] text-muted mt-0.5">{c.name} · {c.sector} · {c.watched ? "on watchlist" : "not watched"}</div>
-            <Spark data={c.heatTrend} />
+            {showHeat && <Spark data={c.heatTrend} />}
           </div>
-          <div className="text-right">
-            <div className="text-[30px] font-extrabold text-pos">{c.heat}</div>
-            <div className="text-[12px] tracking-wide text-muted whitespace-nowrap">HEAT · {c.heatTrend.length}D</div>
-          </div>
+          {showHeat ? (
+            <div className="text-right">
+              <div className="text-[30px] font-extrabold text-pos">{c.heat}</div>
+              <div className="text-[12px] tracking-wide text-muted whitespace-nowrap">HEAT · {c.heatTrend.length}D <Help term="heat" /></div>
+            </div>
+          ) : (
+            <div className="text-right">
+              <div className="text-[30px] font-extrabold tabular-nums">{c.eventsToday}</div>
+              <div className="text-[12px] tracking-wide text-muted whitespace-nowrap">EVENT{c.eventsToday === 1 ? "" : "S"} TODAY</div>
+            </div>
+          )}
         </div>
 
         <div className="text-[12px] tracking-[0.15em] text-sub uppercase mb-3">Intelligence Timeline</div>

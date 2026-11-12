@@ -6,6 +6,8 @@ import { Crumbs, TickerTag, ThemeTag } from "@/components/ui";
 import { eventById, events as mockEvents } from "@/data/mock";
 import { api, apiEnabled } from "@/lib/api";
 import { sourceLink } from "@/lib/links";
+import { Help } from "@/components/Help";
+import type { Term } from "@/lib/glossary";
 
 export default async function EventView({ params }: { params: { id: string } }) {
   const id = decodeURIComponent(params.id);
@@ -39,10 +41,10 @@ export default async function EventView({ params }: { params: { id: string } }) 
           <p className="font-sans text-[13.5px] leading-relaxed max-w-[680px]">{ev.summary}</p>
 
           <div className="grid grid-cols-2 gap-3.5 my-5">
-            <Box label="Importance">
+            <Box label="Importance" help="importance">
               <span style={{ color: ev.priority === "high" ? "#f59e0b" : ev.priority === "med" ? "#e8e8e8" : "#808080" }}>{ev.importance} / 100</span>
             </Box>
-            <Box label="Confidence">
+            <Box label="Confidence" help="confidence">
               {ev.confidence} / 100
               <span className="block h-[5px] bg-line rounded mt-[7px] overflow-hidden">
                 <span className="block h-full bg-mint" style={{ width: `${ev.confidence}%` }} />
@@ -83,10 +85,10 @@ export default async function EventView({ params }: { params: { id: string } }) 
   );
 }
 
-function Box({ label, children }: { label: string; children: React.ReactNode }) {
+function Box({ label, help, children }: { label: string; help?: Term; children: React.ReactNode }) {
   return (
     <div className="bg-cardhi border border-line rounded-[7px] px-3.5 py-3">
-      <div className="text-[12px] tracking-wide text-muted uppercase mb-1.5">{label}</div>
+      <div className="text-[12px] tracking-wide text-muted uppercase mb-1.5">{label}{help && <> <Help term={help} /></>}</div>
       <div className="text-[14px]">{children}</div>
     </div>
   );
