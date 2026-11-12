@@ -1,0 +1,77 @@
+name: check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  # Gating: typecheck and production build. There is no test suite yet.
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx tsc --noEmit
+      - run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+
+  # Advisory: never blocks. The ui-qa agent reads the uploaded artifact.
+  ui-smoke:
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+      - name: Start the standalone server in mock mode
+        run: |
+          cp -r .next/static .next/standalone/.next/
+          PORT=3000 HOSTNAME=127.0.0.1 node .next/standalone/server.js > server.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:3000/healthz && break
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:3000/healthz
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install playwright && playwright install --with-deps chromium
+      - run: >
+          python scripts/ui_smoke.py --base http://127.0.0.1:3000 --out ui-smoke
+          --paths / /watchlist /companies /companies/ionq /themes /themes/quantum
+          /government /government/hr4871 /event/e1 /graph /search /alerts /reports /world
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: ui-smoke
+          path: |
+            ui-smoke/
+            server.log
+
+  # Advisory: never blocks. The security-review agent reads the log.
+  security:
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm audit --omit=dev

@@ -54,7 +54,7 @@ export default function Search() {
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Ask in plain language — e.g. quantum legislation last 90 days"
+            placeholder="Ask in plain language, e.g. quantum legislation last 90 days"
             className="flex-1 bg-card border border-line rounded-lg px-3.5 py-2.5 text-[13px] text-ink placeholder:text-faint focus:outline-none focus:border-info font-mono"
           />
         </div>

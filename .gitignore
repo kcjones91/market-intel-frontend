@@ -4,3 +4,5 @@ out/
 .env
 .env.*
 *.tsbuildinfo
+ui-smoke/
+server.log

@@ -8,7 +8,7 @@ import { Shell } from "@/components/Shell";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Market Intel — OSINT Workspace",
+  title: "Market Intel: OSINT Workspace",
   description: "Public-source intelligence for investment research.",
 };
 
