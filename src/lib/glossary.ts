@@ -35,12 +35,6 @@ export const GLOSSARY = {
       "A score from 0 to 100 for how much is happening around a company or theme: how many events, how important they are and how recent. " +
       "Heat is not calculated from live data yet, so the live site does not show it. Any heat you see is sample data.",
   },
-  theme: {
-    title: "Theme",
-    body:
-      "A topic the site follows across companies and government activity. Each event is tagged with the themes it touches, " +
-      "so a theme page gathers everything related in one place.",
-  },
 } satisfies Record<string, GlossaryEntry>;
 
 export type Term = keyof typeof GLOSSARY;

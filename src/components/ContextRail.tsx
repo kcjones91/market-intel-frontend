@@ -68,7 +68,7 @@ export function ContextRail() {
       {watched.map((c) => (
         <Link
           key={c.id}
-          href={`/companies/${c.id}`}
+          href={`/companies/${encodeURIComponent(c.id)}`}
           className="flex items-center justify-between py-[9px] border-b border-linesoft last:border-0 group"
         >
           <div>
@@ -85,7 +85,7 @@ export function ContextRail() {
         <div className="mt-7">
           <div className="text-[12px] tracking-[0.12em] text-muted uppercase mb-3">{showHeat ? "Theme heat · 7 days" : "Themes · events today"}</div>
           {heatThemes.map((t) => showHeat ? (
-            <Link key={t.id} href={`/themes/${t.id}`} className="grid grid-cols-[112px_1fr_26px] items-center gap-2 py-1.5 group">
+            <Link key={t.id} href={`/themes/${encodeURIComponent(t.id)}`} className="grid grid-cols-[112px_1fr_26px] items-center gap-2 py-1.5 group">
               <span className="text-[12px] text-sub group-hover:text-ink truncate">{t.name}</span>
               <span className="h-1 bg-line rounded-sm overflow-hidden">
                 <span className="block h-full bg-mint/85" style={{ width: `${t.heat}%` }} />
@@ -93,7 +93,7 @@ export function ContextRail() {
               <span className="text-[12px] text-muted text-right tabular-nums">{t.heat}</span>
             </Link>
           ) : (
-            <Link key={t.id} href={`/themes/${t.id}`} className="flex items-center justify-between gap-2 py-1.5 group">
+            <Link key={t.id} href={`/themes/${encodeURIComponent(t.id)}`} className="flex items-center justify-between gap-2 py-1.5 group">
               <span className="text-[12px] text-sub group-hover:text-ink truncate">{t.name}</span>
               <span className="text-[12px] text-muted tabular-nums">{t.eventsToday}</span>
             </Link>

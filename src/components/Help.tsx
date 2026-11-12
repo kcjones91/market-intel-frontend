@@ -40,7 +40,8 @@ export function Help({ term, className }: { term: Term; className?: string }) {
         ref={dialog}
         aria-labelledby={titleId}
         // A click on the backdrop lands on the dialog element itself; the content is one level down.
-        onClick={(e) => { if (e.target === e.currentTarget) e.currentTarget.close(); }}
+        // Stop the click here: React events bubble to the component's parents, which may be a clickable card.
+        onClick={(e) => { e.stopPropagation(); if (e.target === e.currentTarget) e.currentTarget.close(); }}
         className="help-sheet m-0 mt-auto w-full max-w-full md:m-auto md:max-w-[420px] p-0 bg-card text-ink border border-line rounded-t-[14px] md:rounded-[12px] backdrop:bg-black/70"
       >
         <div className="px-5 pt-5 pb-[max(20px,env(safe-area-inset-bottom))] font-sans text-left font-normal normal-case tracking-normal whitespace-normal">

@@ -16,6 +16,7 @@ export function heatVisible(live: boolean): boolean {
 }
 
 /** Order for lists that used to sort by heat: most events today first, then by name. */
+// Nothing validates the API response, so a missing field must not break the sort or the page.
 export function byActivity<T extends { eventsToday: number; name: string }>(a: T, b: T): number {
-  return b.eventsToday - a.eventsToday || a.name.localeCompare(b.name);
+  return (b.eventsToday ?? 0) - (a.eventsToday ?? 0) || (a.name ?? "").localeCompare(b.name ?? "", "en");
 }

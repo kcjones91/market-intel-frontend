@@ -82,7 +82,7 @@ export default async function Dashboard() {
           <details id="low" className="fold scroll-mt-[104px] md:scroll-mt-4 mt-[18px]" open={high.length + med.length === 0}>
             <summary className="flex items-center gap-2 min-h-[44px] cursor-pointer text-[12px] tracking-[0.15em] text-sub uppercase rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-mint">
               <span className="w-[7px] h-[7px] rounded-full" style={{ background: "#6e6e6e" }} />
-              Low Priority
+              <h2 className="font-normal">Low Priority</h2>
               <span className="text-muted tabular-nums">{low.length}</span>
               <span className="fold-closed ml-auto text-muted normal-case tracking-normal">Show</span>
               <span className="fold-open ml-auto text-muted normal-case tracking-normal">Hide</span>
@@ -115,5 +115,5 @@ function Count({ href, n, label, tone }: { href: string; n: number; label: strin
   );
   const box = "flex flex-col items-start justify-center min-h-[56px] px-3.5 py-2 bg-card border border-line rounded-lg";
   // Nothing to jump to when the count is zero.
-  return n ? <a href={href} className={`${box} hover:border-[#333] focus-visible:outline focus-visible:outline-2 focus-visible:outline-mint`}>{inner}</a> : <div className={box}>{inner}</div>;
+  return n ? <a href={href} aria-label={`${n} ${label.toLowerCase()} priority, jump to section`} className={`${box} hover:border-[#333] focus-visible:outline focus-visible:outline-2 focus-visible:outline-mint`}>{inner}</a> : <div className={box}>{inner}</div>;
 }
