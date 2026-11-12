@@ -16,7 +16,7 @@ export default async function Alerts() {
 
   return (
     <ViewFrame rail={rail}>
-      <div className="px-[26px] py-[18px]">
+      <div className="px-4 md:px-[26px] py-[18px]">
         <Crumbs items={[{ label: "Alerts" }]} />
         <PageHead title="Alerts" stamp={`${triggeredAlerts.length} FIRED TODAY`} />
 

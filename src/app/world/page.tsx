@@ -6,7 +6,7 @@ import { regions } from "@/data/mock";
 export default function World() {
   return (
     <ViewFrame rail={<ContextRail scopeLabel="World Events" />}>
-      <div className="px-[26px] py-[18px]">
+      <div className="px-4 md:px-[26px] py-[18px]">
         <Crumbs items={[{ label: "World Events" }]} />
         <PageHead title="World Events" stamp="GEOPOLITICAL · V2 PREVIEW" />
         <div className="h-4" />

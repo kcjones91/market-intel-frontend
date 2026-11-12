@@ -15,7 +15,7 @@ export default async function Watchlist() {
 
   return (
     <ViewFrame rail={rail}>
-      <div className="px-[26px] py-[18px]">
+      <div className="px-4 md:px-[26px] py-[18px]">
         <Crumbs items={[{ label: "Watchlist" }]} />
         <PageHead title="Watchlist" stamp={`${watched.length} NAME${watched.length === 1 ? "" : "S"} · BY HEAT`} />
         <div className="h-4" />

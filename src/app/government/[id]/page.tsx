@@ -25,7 +25,7 @@ export default async function GovView({ params }: { params: { id: string } }) {
 
   return (
     <ViewFrame rail={rail}>
-      <div className="px-[26px] py-[18px]">
+      <div className="px-4 md:px-[26px] py-[18px]">
         <Crumbs items={[{ href: "/government", label: "Government" }, { label: g.ref }]} />
 
         <div className="bg-card border border-line rounded-[10px] p-[22px]">

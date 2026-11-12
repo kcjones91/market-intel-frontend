@@ -12,7 +12,7 @@ export default async function Themes() {
 
   return (
     <ViewFrame rail={rail}>
-      <div className="px-[26px] py-[18px]">
+      <div className="px-4 md:px-[26px] py-[18px]">
         <Crumbs items={[{ label: "Themes" }]} />
         <PageHead title="Themes" stamp="7-DAY HEAT" />
         <div className="h-4" />

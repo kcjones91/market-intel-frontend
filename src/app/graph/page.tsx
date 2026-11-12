@@ -79,7 +79,7 @@ export default function Graph() {
 
   return (
     <ViewFrame rail={rail}>
-      <div className="px-[26px] py-[18px]">
+      <div className="px-4 md:px-[26px] py-[18px]">
         <Crumbs items={[{ label: "Graph" }]} />
         <PageHead title="Relationship Graph" stamp="CO-OCCURRENCE · TYPED EDGES" />
         <div className="text-[12px] text-sub mt-1.5">Click a node to focus its neighborhood. Edges link entities that appear together or fund/contract each other.</div>

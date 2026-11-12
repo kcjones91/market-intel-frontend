@@ -4,14 +4,15 @@ import { Nav } from "./Nav";
 // per-page (so each view can re-scope it), via the ContextRail component.
 export function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-[200px_1fr] min-h-screen">
+    <div className="md:grid md:grid-cols-[200px_1fr] min-h-screen">
       <Nav />
       <div className="min-w-0">{children}</div>
     </div>
   );
 }
 
-// Two-column inner frame: center workspace + right context rail.
+// Inner frame: center workspace + context rail. The rail sits beside the
+// content on wide screens and below it on phones and tablets.
 export function ViewFrame({
   children,
   rail,
@@ -20,8 +21,8 @@ export function ViewFrame({
   rail: React.ReactNode;
 }) {
   return (
-    <div className="grid grid-cols-[1fr_280px] min-h-screen">
-      <main className="min-w-0 overflow-y-auto pane">{children}</main>
+    <div className="lg:grid lg:grid-cols-[1fr_280px] lg:min-h-screen">
+      <main className="min-w-0 lg:overflow-y-auto pane">{children}</main>
       {rail}
     </div>
   );

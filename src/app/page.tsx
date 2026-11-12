@@ -35,14 +35,14 @@ export default async function Dashboard() {
 
   return (
     <ViewFrame rail={rail}>
-      <div className="px-[26px] py-[18px]">
+      <div className="px-4 md:px-[26px] py-[18px]">
         <PageHead title="Today's Intelligence" stamp={stamp} />
         {ingest && <div className="text-[12px] text-sub mt-1.5">{ingest}</div>}
 
         {quotes.length > 0 && (
-          <div className="flex bg-card border border-line rounded-lg my-5 overflow-hidden">
+          <div className="flex bg-card border border-line rounded-lg my-5 overflow-x-auto no-scrollbar">
             {quotes.map((q) => (
-              <Link key={q.sym} href={`/companies/${q.sym.toLowerCase()}`} className="flex-1 px-3.5 py-[9px] border-r border-line last:border-0 hover:bg-cardhi">
+              <Link key={q.sym} href={`/companies/${q.sym.toLowerCase()}`} className="flex-1 shrink-0 whitespace-nowrap px-3.5 py-[9px] border-r border-line last:border-0 hover:bg-cardhi">
                 <span className="text-[12px] font-bold">{q.sym}</span>
                 <span className="text-[11px] ml-1.5" style={{ color: q.d > 0 ? "#22c55e" : "#ff5000" }}>{q.px} {q.chg}</span>
               </Link>

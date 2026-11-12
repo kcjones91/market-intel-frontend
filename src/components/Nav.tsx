@@ -23,13 +23,14 @@ const PRIMARY: Item[] = [
 export function Nav() {
   const path = usePathname();
   return (
-    <nav className="bg-rail border-r border-line h-screen sticky top-0 overflow-y-auto pane py-4 select-none">
-      <Link href="/" className="block px-4 pb-5">
+    <nav className="bg-rail border-b md:border-b-0 md:border-r border-line sticky top-0 z-30 md:h-screen md:overflow-y-auto pane md:py-4 select-none">
+      <Link href="/" className="block px-4 pt-3 pb-1.5 md:pt-0 md:pb-5">
         <div className="text-mint text-[15px] font-extrabold tracking-[0.12em]">◢ MARKET INTEL</div>
-        <div className="text-muted text-[9px] tracking-[0.2em] mt-0.5">OSINT WORKSPACE</div>
+        <div className="hidden md:block text-muted text-[9px] tracking-[0.2em] mt-0.5">OSINT WORKSPACE</div>
       </Link>
 
-      <div className="text-faint text-[9px] tracking-[0.15em] px-4 pb-1.5">VIEWS</div>
+      <div className="hidden md:block text-faint text-[9px] tracking-[0.15em] px-4 pb-1.5">VIEWS</div>
+      <div className="flex md:block overflow-x-auto md:overflow-visible no-scrollbar px-1 md:px-0">
       {PRIMARY.map((it) => {
         const active = it.href === "/" ? path === "/" : path.startsWith(it.href);
         return (
@@ -37,7 +38,7 @@ export function Nav() {
             key={it.href}
             href={it.href}
             className={cn(
-              "flex items-center justify-between px-4 py-[7px] text-[12.5px] border-l-2 border-transparent",
+              "flex shrink-0 items-center justify-between whitespace-nowrap px-3 md:px-4 py-2 md:py-[7px] text-[12.5px] border-b-2 md:border-b-0 md:border-l-2 border-transparent",
               active ? "text-mint border-mint bg-mint/[0.04]" : "text-sub hover:text-ink hover:bg-linesoft"
             )}
           >
@@ -53,6 +54,7 @@ export function Nav() {
           </Link>
         );
       })}
+      </div>
     </nav>
   );
 }

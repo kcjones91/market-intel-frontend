@@ -46,7 +46,7 @@ export default function Search() {
 
   return (
     <ViewFrame rail={rail}>
-      <div className="px-[26px] py-[18px]">
+      <div className="px-4 md:px-[26px] py-[18px]">
         <Crumbs items={[{ label: "Search" }]} />
         <PageHead title="Search" stamp="FULL CORPUS" />
         <div className="h-4" />

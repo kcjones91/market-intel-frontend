@@ -21,7 +21,7 @@ export default async function ThemeView({ params }: { params: { id: string } }) 
 
   return (
     <ViewFrame rail={rail}>
-      <div className="px-[26px] py-[18px]">
+      <div className="px-4 md:px-[26px] py-[18px]">
         <Crumbs items={[{ href: "/themes", label: "Themes" }, { label: t.name }]} />
 
         <div className="flex items-center justify-between bg-card border border-line rounded-[10px] px-5 py-[18px] mb-4">

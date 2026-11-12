@@ -15,4 +15,11 @@ html, body { background: #0a0a0a; color: #e8e8e8; }
 .pane::-webkit-scrollbar-thumb { background: #222; border-radius: 4px; }
 .pane::-webkit-scrollbar-track { background: transparent; }
 
+/* horizontally scrolling rows without a visible scrollbar (mobile nav) */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* never let a wide child push the page sideways on phones */
+body { overflow-x: clip; }
+
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

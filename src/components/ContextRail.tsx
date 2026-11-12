@@ -59,7 +59,7 @@ export function ContextRail({
   const heatThemes = [...(data?.themes ?? [])].sort((a, b) => b.heat - a.heat).slice(0, 5);
 
   return (
-    <aside className="border-l border-line h-screen sticky top-0 overflow-y-auto pane px-[18px] py-5">
+    <aside className="border-t lg:border-t-0 lg:border-l border-line lg:h-screen lg:sticky lg:top-0 lg:overflow-y-auto pane px-4 lg:px-[18px] py-5">
       <div className="flex gap-4 text-[10px] tracking-[0.15em] text-faint uppercase mb-4">
         <span className="text-sub">Watchlist</span><span>Heat</span>
       </div>

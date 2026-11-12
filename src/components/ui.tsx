@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 
 export function Crumbs({ items }: { items: { href?: string; label: string }[] }) {
   return (
-    <div className="flex items-center gap-[7px] text-[11px] text-muted mb-3">
+    <div className="flex flex-wrap items-center gap-[7px] text-[11px] text-muted mb-3 break-all">
       {items.map((it, i) => {
         const last = i === items.length - 1;
         return (
@@ -25,7 +25,7 @@ export function Crumbs({ items }: { items: { href?: string; label: string }[] })
 
 export function PageHead({ title, stamp }: { title: string; stamp?: string }) {
   return (
-    <div className="flex items-baseline justify-between">
+    <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
       <h1 className="text-[18px] font-bold">{title}</h1>
       {stamp && <div className="text-[11px] text-sub tracking-wide">{stamp}</div>}
     </div>
@@ -81,11 +81,11 @@ export function EventCard({ ev }: { ev: IntelEvent }) {
       </div>
       <Link
         href={`/event/${ev.id}`}
-        className="block font-sans text-[15px] font-semibold my-[7px] leading-snug max-w-[88%] after:absolute after:inset-0 after:content-['']"
+        className="block font-sans text-[15px] font-semibold my-[7px] leading-snug max-w-[82%] md:max-w-[88%] after:absolute after:inset-0 after:content-['']"
       >
         {ev.title}
       </Link>
-      <div className="font-sans text-[12.5px] text-sub leading-relaxed max-w-[92%]">{ev.summary}</div>
+      <div className="font-sans text-[12.5px] text-sub leading-relaxed md:max-w-[92%]">{ev.summary}</div>
 
       <div className="absolute top-[14px] right-4 text-right pointer-events-none">
         <div className={cn("text-[19px] font-extrabold leading-none", scoreColor(ev.priority))}>{ev.importance}</div>
