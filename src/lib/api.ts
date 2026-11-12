@@ -73,10 +73,13 @@ async function request<T>(path: string, init?: RequestInit, notFoundIsNull = fal
   } catch {
     throw new ApiError(`API unreachable: ${path}`);
   }
+  if (res.ok) return (await res.json()) as T;
+
+  // Not using the body: release it, or the connection stays open until it is collected.
+  await res.body?.cancel().catch(() => {});
   if (!isServer && res.status === 501) return null;   // proxy reports: no API configured
   if (res.status === 404 && notFoundIsNull) return null;
-  if (!res.ok) throw new ApiError(`API error ${res.status}: ${path}`, res.status);
-  return (await res.json()) as T;
+  throw new ApiError(`API error ${res.status}: ${path}`, res.status);
 }
 
 const get = <T,>(path: string) => request<T>(path);
