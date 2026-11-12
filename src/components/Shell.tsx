@@ -11,8 +11,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Inner frame: center workspace + context rail. The rail sits beside the
-// content on wide screens and below it on phones and tablets.
+// Inner frame: center workspace + side panel. The panel sits beside the
+// content on wide screens and is hidden on phones and tablets.
 export function ViewFrame({
   children,
   rail,
@@ -22,7 +22,12 @@ export function ViewFrame({
 }) {
   return (
     <div className="lg:grid lg:grid-cols-[1fr_280px] lg:min-h-screen">
-      <main className="min-w-0 lg:overflow-y-auto pane">{children}</main>
+      <main className="min-w-0 lg:overflow-y-auto pane">
+        {children}
+        <footer className="px-4 md:px-[26px] pt-6 pb-8 font-sans text-[12px] text-muted leading-relaxed">
+          Munny Moves Intel is a research tool built on public records. Nothing here is investment advice.
+        </footer>
+      </main>
       {rail}
     </div>
   );

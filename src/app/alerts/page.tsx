@@ -12,7 +12,7 @@ export default async function Alerts() {
   const triggeredAlerts = data ? data.triggered : mockTriggered;
   const alertRules = data ? data.rules : mockRules;
 
-  const rail = <ContextRail scopeLabel="Alerts" suggestions={["Why did this rule fire?", "Suggest a rule for quantum funding", "Mute low-signal alerts"]} />;
+  const rail = <ContextRail />;
 
   return (
     <ViewFrame rail={rail}>
@@ -20,7 +20,7 @@ export default async function Alerts() {
         <Crumbs items={[{ label: "Alerts" }]} />
         <PageHead title="Alerts" stamp={`${triggeredAlerts.length} FIRED TODAY`} />
 
-        <div className="text-[11px] tracking-[0.15em] text-sub uppercase mt-5 mb-3">Triggered</div>
+        <div className="text-[12px] tracking-[0.15em] text-sub uppercase mt-5 mb-3">Triggered</div>
         {triggeredAlerts.length === 0 && <div className="text-muted text-[12.5px] py-6 text-center">No alerts have fired today.</div>}
         {triggeredAlerts.map((a) => {
           const rid = a.ref ? encodeURIComponent(a.ref.id) : "";
@@ -29,28 +29,28 @@ export default async function Alerts() {
             <Link key={a.id} href={href} className="flex justify-between items-center bg-card border border-line rounded-[9px] px-4 py-3 mb-2.5 hover:border-[#333]">
               <div>
                 <div className="font-sans text-[13px]">{a.hit}</div>
-                <div className="text-[10px] text-muted mt-0.5">{a.ruleName} · {a.time}</div>
+                <div className="text-[12px] text-muted mt-0.5">{a.ruleName} · {a.time}</div>
               </div>
-              <div className="text-neg text-[12px]">▲</div>
+              <div className="text-amber text-[12px]" aria-hidden="true">●</div>
             </Link>
           );
         })}
 
-        <div className="text-[11px] tracking-[0.15em] text-sub uppercase mt-7 mb-3 border-t border-line pt-[18px]">Rules</div>
+        <div className="text-[12px] tracking-[0.15em] text-sub uppercase mt-7 mb-3 border-t border-line pt-[18px]">Rules</div>
         {alertRules.length === 0 && <div className="text-muted text-[12.5px] py-6 text-center">No alert rules defined.</div>}
         {alertRules.map((r) => (
           <div key={r.id} className="flex justify-between items-center bg-card border border-line rounded-[9px] px-4 py-3 mb-2.5">
             <div>
               <div className="text-[13px] font-semibold">{r.name}</div>
-              <div className="text-[10px] text-muted mt-0.5">{r.scopeKind} · {r.scopeValue}</div>
+              <div className="text-[12px] text-muted mt-0.5">{r.scopeKind} · {r.scopeValue}</div>
             </div>
             <div className="flex items-center gap-3">
               <div className="flex gap-1.5">
                 {r.channels.map((ch) => (
-                  <span key={ch} className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase" style={{ color: channelColor[ch] ?? "#8a8a8a", border: `1px solid ${channelColor[ch] ?? "#8a8a8a"}40` }}>{ch}</span>
+                  <span key={ch} className="text-[12px] font-bold px-1.5 py-0.5 rounded uppercase" style={{ color: channelColor[ch] ?? "#8a8a8a", border: `1px solid ${channelColor[ch] ?? "#8a8a8a"}40` }}>{ch}</span>
                 ))}
               </div>
-              <span className="text-[10px]" style={{ color: r.enabled ? "#00ff88" : "#444" }}>{r.enabled ? "ON" : "OFF"}</span>
+              <span className="text-[12px]" style={{ color: r.enabled ? "#00ff88" : "#444" }}>{r.enabled ? "ON" : "OFF"}</span>
             </div>
           </div>
         ))}

@@ -16,7 +16,7 @@ export default async function CompanyView({ params }: { params: { id: string } }
   const evs = data ? data.timeline : mockEvents.filter((e) => e.companies.includes(c.id));
   const gov = data ? data.government : mockGov.filter((g) => g.affects.includes(c.id));
   const label = c.ticker ?? c.name;
-  const rail = <ContextRail scopeLabel={label} suggestions={["Summarize today's catalysts", "What's driving the heat score?", "Show related government contracts"]} />;
+  const rail = <ContextRail />;
 
   return (
     <ViewFrame rail={rail}>
@@ -26,26 +26,26 @@ export default async function CompanyView({ params }: { params: { id: string } }
         <div className="flex items-center justify-between bg-card border border-line rounded-[10px] px-5 py-[18px] mb-4">
           <div>
             <div className="text-[26px] font-extrabold">{label}</div>
-            <div className="text-[11px] text-muted mt-0.5">{c.name} · {c.sector} · {c.watched ? "on watchlist" : "not watched"}</div>
+            <div className="text-[12px] text-muted mt-0.5">{c.name} · {c.sector} · {c.watched ? "on watchlist" : "not watched"}</div>
             <Spark data={c.heatTrend} />
           </div>
           <div className="text-right">
             <div className="text-[30px] font-extrabold text-pos">{c.heat}</div>
-            <div className="text-[9px] tracking-wide text-faint">HEAT · {c.heatTrend.length}D</div>
+            <div className="text-[12px] tracking-wide text-muted">HEAT · {c.heatTrend.length}D</div>
           </div>
         </div>
 
-        <div className="text-[11px] tracking-[0.15em] text-sub uppercase mb-3">Intelligence Timeline</div>
+        <div className="text-[12px] tracking-[0.15em] text-sub uppercase mb-3">Intelligence Timeline</div>
         {evs.length ? evs.map((e) => <EventCard key={e.id} ev={e} />) : <Empty>No events for {label} yet.</Empty>}
 
         {gov.length > 0 && (
           <>
-            <div className="text-[11px] tracking-[0.15em] text-sub uppercase mt-6 mb-3 border-t border-line pt-[18px]">Government Activity</div>
+            <div className="text-[12px] tracking-[0.15em] text-sub uppercase mt-6 mb-3 border-t border-line pt-[18px]">Government Activity</div>
             {gov.map((g) => (
               <div key={g.id} className="bg-card border border-line rounded-[9px] px-4 py-3 mb-2.5">
-                <div className="text-[10px] tracking-wide text-muted uppercase">{g.agency} · {g.kind} · {g.ref}</div>
+                <div className="text-[12px] tracking-wide text-muted uppercase">{g.agency} · {g.kind} · {g.ref}</div>
                 <div className="font-sans text-[14px] font-semibold mt-1">{g.title}</div>
-                <div className="text-[11px] text-sub mt-1">{g.status}</div>
+                <div className="text-[12px] text-sub mt-1">{g.status}</div>
               </div>
             ))}
           </>

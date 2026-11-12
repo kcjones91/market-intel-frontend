@@ -42,7 +42,7 @@ export default function Search() {
     return () => { cancelled = true; clearTimeout(timer); };
   }, [q, norm]);
 
-  const rail = <ContextRail scopeLabel="Search" suggestions={["All quantum legislation, last 90 days", "Companies with increasing gov activity", "Agencies interacting with IonQ"]} />;
+  const rail = <ContextRail />;
 
   return (
     <ViewFrame rail={rail}>
@@ -55,12 +55,12 @@ export default function Search() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Ask in plain language, e.g. quantum legislation last 90 days"
-            className="flex-1 bg-card border border-line rounded-lg px-3.5 py-2.5 text-[13px] text-ink placeholder:text-faint focus:outline-none focus:border-info font-mono"
+            className="flex-1 bg-card border border-line rounded-lg px-3.5 py-2.5 text-[13px] text-ink placeholder:text-muted focus:outline-none focus:border-info font-mono"
           />
         </div>
         <div className="flex gap-2 flex-wrap mb-5">
           {EXAMPLES.map((x) => (
-            <button key={x} onClick={() => setQ(x)} className="text-[11px] text-info border border-info/30 rounded px-2.5 py-1 hover:bg-info/10">{x}</button>
+            <button key={x} onClick={() => setQ(x)} className="text-[12px] text-info border border-info/30 rounded px-3 min-h-[40px] hover:bg-info/10">{x}</button>
           ))}
         </div>
 
@@ -70,7 +70,7 @@ export default function Search() {
           <div className="text-muted text-[12.5px] py-10 text-center">Searching…</div>
         ) : (
           <>
-            <div className="text-[10px] tracking-wide text-faint uppercase mb-3">{results.length} result{results.length === 1 ? "" : "s"}</div>
+            <div className="text-[12px] tracking-wide text-muted uppercase mb-3">{results.length} result{results.length === 1 ? "" : "s"}</div>
             {results.length ? results.map((e) => <EventCard key={e.id} ev={e} />) : <div className="text-muted text-[12.5px] py-10 text-center">No matches. Try a broader term.</div>}
           </>
         )}

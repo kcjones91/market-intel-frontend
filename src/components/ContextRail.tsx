@@ -10,13 +10,7 @@ function heatColor(h: number) {
   if (h >= 80) return "text-pos";
   if (h >= 60) return "text-amber";
   if (h >= 40) return "text-sub";
-  return "text-faint";
-}
-function heatIcon(h: number) {
-  if (h >= 80) return "🔥";
-  if (h >= 60) return "⚠";
-  if (h >= 40) return "✓";
-  return "·";
+  return "text-muted";
 }
 
 type RailData = { companies: Company[]; themes: Theme[] };
@@ -25,48 +19,47 @@ type RailData = { companies: Company[]; themes: Theme[] };
 // flash a loading state on each page, then refresh it in the background.
 let cache: RailData | null = null;
 
-export function ContextRail({
-  scopeLabel = "Dashboard",
-  suggestions = [
-    "Which names benefit from HR-4871?",
-    "Quantum legislation, last 90 days",
-    "Why is IONQ heat rising?",
-  ],
-}: {
-  scopeLabel?: string;
-  suggestions?: string[];
-}) {
+const WIDE = "(min-width: 1024px)";
+
+// Side panel: watchlist heat and theme heat. Shown beside the content on wide
+// screens only. On phones and tablets both lists are one tap away in the nav
+// (Watchlist, Themes), and repeating them under every page buried the content.
+export function ContextRail() {
   const [data, setData] = useState<RailData | null>(cache);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    const mq = window.matchMedia(WIDE);
+
+    const load = async () => {
+      if (!mq.matches) return;   // hidden on narrow screens, so do not fetch for it
       try {
         const [cos, ths] = await Promise.all([api.companies(), api.themes()]);
-        // null = no API configured, so use the bundled mock data.
+        // null = no API configured, so use the bundled sample data.
         const next: RailData = { companies: cos ?? mockCompanies, themes: ths ?? mockThemes };
         cache = next;
         if (!cancelled) { setData(next); setFailed(false); }
       } catch {
         if (!cancelled) setFailed(true);
       }
-    })();
-    return () => { cancelled = true; };
+    };
+
+    load();
+    mq.addEventListener("change", load);
+    return () => { cancelled = true; mq.removeEventListener("change", load); };
   }, []);
 
   const watched = (data?.companies ?? []).filter((c) => c.watched).sort((a, b) => b.heat - a.heat);
   const heatThemes = [...(data?.themes ?? [])].sort((a, b) => b.heat - a.heat).slice(0, 5);
 
   return (
-    <aside className="border-t lg:border-t-0 lg:border-l border-line lg:h-screen lg:sticky lg:top-0 lg:overflow-y-auto pane px-4 lg:px-[18px] py-5">
-      <div className="flex gap-4 text-[10px] tracking-[0.15em] text-faint uppercase mb-4">
-        <span className="text-sub">Watchlist</span><span>Heat</span>
-      </div>
+    <aside className="hidden lg:block border-l border-line h-screen sticky top-0 overflow-y-auto pane px-[18px] py-5">
+      <div className="text-[12px] tracking-[0.12em] text-muted uppercase mb-3">Watchlist heat</div>
 
-      {!data && !failed && <div className="text-[11px] text-faint py-2">Loading…</div>}
-      {!data && failed && <div className="text-[11px] text-neg py-2">Intel API unavailable.</div>}
-      {data && watched.length === 0 && <div className="text-[11px] text-faint py-2">No watched companies.</div>}
+      {!data && !failed && <div className="text-[12px] text-muted py-2">Loading…</div>}
+      {!data && failed && <div className="text-[12px] text-neg py-2">Intel API unavailable.</div>}
+      {data && watched.length === 0 && <div className="text-[12px] text-muted py-2">No watched companies.</div>}
 
       {watched.map((c) => (
         <Link
@@ -76,44 +69,28 @@ export function ContextRail({
         >
           <div>
             <div className="text-[13px] font-bold group-hover:text-mint">{c.ticker ?? c.name}</div>
-            <div className="text-[10px] text-muted mt-0.5">
-              {c.eventsToday ? `${c.eventsToday} events today` : "no events"}
+            <div className="text-[12px] text-muted mt-0.5">
+              {c.eventsToday ? `${c.eventsToday} event${c.eventsToday === 1 ? "" : "s"} today` : "no events today"}
             </div>
           </div>
-          <div className={cn("flex items-center gap-1.5 text-[13px] font-bold", heatColor(c.heat))}>
-            {heatIcon(c.heat)} {c.heat}
-          </div>
+          <div className={cn("text-[13px] font-bold tabular-nums", heatColor(c.heat))}>{c.heat}</div>
         </Link>
       ))}
 
-      <div className="mt-7">
-        <div className="text-[10px] tracking-[0.15em] text-faint uppercase mb-3">
-          Theme Heat Map <span className="text-muted ml-1">7D</span>
-        </div>
-        {heatThemes.map((t) => (
-          <Link key={t.id} href={`/themes/${t.id}`} className="grid grid-cols-[60px_1fr_26px] items-center gap-2 mb-[9px] group">
-            <span className="text-[11.5px] text-sub group-hover:text-ink truncate">{t.name}</span>
-            <span className="h-1 bg-line rounded-sm overflow-hidden">
-              <span className="block h-full bg-mint/85" style={{ width: `${t.heat}%` }} />
-            </span>
-            <span className="text-[10.5px] text-muted text-right">{t.heat}</span>
-          </Link>
-        ))}
-      </div>
-
-      <div className="flex items-center gap-1.5 text-[10px] tracking-[0.15em] text-faint uppercase mt-7">
-        ⚡ Ask the Analyst
-      </div>
-      <div className="mt-3.5 bg-card border border-line rounded-lg p-3">
-        <div className="text-[9.5px] tracking-wide text-mint mb-2">SCOPE · {scopeLabel.toUpperCase()}</div>
-        <div className="text-[11.5px] text-faint">Ask across all intel...</div>
-        <div className="text-[11px] text-info mt-2.5 leading-7">
-          {suggestions.map((s, i) => (
-            <div key={i} className="cursor-pointer hover:text-ink before:content-['›_'] before:text-muted">{s}</div>
+      {heatThemes.length > 0 && (
+        <div className="mt-7">
+          <div className="text-[12px] tracking-[0.12em] text-muted uppercase mb-3">Theme heat · 7 days</div>
+          {heatThemes.map((t) => (
+            <Link key={t.id} href={`/themes/${t.id}`} className="grid grid-cols-[84px_1fr_26px] items-center gap-2 py-1.5 group">
+              <span className="text-[12px] text-sub group-hover:text-ink truncate">{t.name}</span>
+              <span className="h-1 bg-line rounded-sm overflow-hidden">
+                <span className="block h-full bg-mint/85" style={{ width: `${t.heat}%` }} />
+              </span>
+              <span className="text-[12px] text-muted text-right tabular-nums">{t.heat}</span>
+            </Link>
           ))}
         </div>
-      </div>
-      <div className="text-[9.5px] text-faint mt-3">Local vLLM · Qwen3.5 · swipe-lab</div>
+      )}
     </aside>
   );
 }

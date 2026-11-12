@@ -19,6 +19,11 @@ html, body { background: #0a0a0a; color: #e8e8e8; }
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
+/* phone nav: fade the right edge so the row reads as scrollable (the row has right padding so the last tab clears the fade) */
+@media (max-width: 767px) {
+  .nav-row { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); }
+}
+
 /* never let a wide child push the page sideways on phones */
 body { overflow-x: clip; }
 
