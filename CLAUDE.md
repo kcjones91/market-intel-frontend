@@ -23,7 +23,8 @@ Next.js 14 App Router, TypeScript, Tailwind, npm, built as a standalone server. 
 rendered per request (`dynamic = "force-dynamic"` in the root layout). Server views call the
 FastAPI backend (`kcjones91/market-intel-backend`, Service `intel-api`) using `API_INTERNAL_URL`,
 read at runtime. Browser views (Search, Graph, the context rail) call same-origin `/api/*`, which
-`src/app/api/[...path]/route.ts` forwards to the backend (GET and POST only). `src/lib/api.ts`
+`src/app/api/[...path]/route.ts` forwards to the backend: an allowlist of the read endpoints the UI
+uses plus POST `/api/search`, nothing else. A new backend route needs adding there. `src/lib/api.ts`
 returns data, `null` (no API configured; also a 404 on a single-record call) or throws (API
 configured but failing, including a 404 on a list endpoint). Mock data
 in `src/data/mock.ts` renders only when no API is configured, under a site-wide SAMPLE DATA banner;
@@ -76,9 +77,10 @@ the work is not grading itself.
 ## Open items (keep short, prune when done)
 
 - No tests. First candidates: `src/lib/api.ts` return contract, the alerts normaliser, graph layout.
-- `npm audit --omit=dev` reports Next.js advisories whose fix is a major upgrade (14 to 16).
+- `npm audit --omit=dev` reports Next.js advisories whose fix is a major upgrade (14 to 16). The
+  image optimizer is off, which removes the worst of them. Node 20 in the Dockerfile is end of life.
 - Backend stores the Congress data API address as `docUrl`; `src/lib/links.ts` maps it to the
-  public bill page at render time. Fix at the source in the Congress worker, then backfill.
+  public bill page at render time, and links only to the hosts listed there. Fix at the source in the Congress worker, then backfill.
 - Ask the Analyst is removed until it works. Reports and World Events are out of the nav.
   Still dead on Alerts: "+ New rule", rule toggles. Watch stars are not toggles.
 - Graph is hard to read on phones. Tags and breadcrumb links are under the 40px touch target.
