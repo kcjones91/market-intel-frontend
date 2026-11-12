@@ -45,8 +45,17 @@ separate pipeline. `WIRING.md` has the view to endpoint map.
 - Secrets never reach the client bundle. `NEXT_PUBLIC_` is public; everything else stays
   server-side. This app holds no secrets today; keep it that way.
 - This is a finance product. Numbers shown to readers come from data, never from a model's
-  prose, and nothing on the site reads as personal investment advice. Sample data never appears
-  as live data.
+  prose. Sample data never appears as live data.
+- What the site is for (Kyle, 2026-11-12; the backend's CLAUDE.md has the full version):
+  readers see the public record before it is news, with a plain account of which tracked
+  company an event touches and through what. That analysis is wanted. Advice is not: nothing
+  on the site tells a reader to do anything (buy, sell, hold, watch), predicts a price, ranks
+  companies, or is tailored to what a reader owns.
+- State the connection, not the outcome. A "why it matters" line says what the record does
+  and the company's sourced connection to it, and leaves the conclusion to the reader. It
+  never says a company benefits, gains or loses, and never forecasts demand or revenue, hedged
+  or not. A company is linked to an event on screen only when the link has a source a reader
+  can open; the site filing a company under a theme is not such a link.
 - Design tokens: colours and font stacks in `tailwind.config.ts`, base styles in
   `src/app/globals.css`. Type sizes and spacing are inline Tailwind values, with no scale file
   yet. One dark theme only. Minimum text size is 12px. Greys: `sub` and `muted` for text,
