@@ -21,6 +21,16 @@ export function byActivity<T extends { eventsToday: number; name: string }>(a: T
   return (b.eventsToday ?? 0) - (a.eventsToday ?? 0) || (a.name ?? "").localeCompare(b.name ?? "", "en");
 }
 
+/**
+ * Text colour for a heat number. Heat is activity, not gain or loss, so it never uses the
+ * gain, loss or warning colours: a hotter name is only brighter.
+ */
+export function heatTone(heat: number): string {
+  if (heat >= 60) return "text-ink";
+  if (heat >= 30) return "text-sub";
+  return "text-muted";
+}
+
 /** Order for lists sorted by heat: hottest first. Ties (many names sit at 0 in a quiet week) fall back to byActivity so the order is stable. */
 export function byHeat<T extends { heat: number; eventsToday: number; name: string }>(a: T, b: T): number {
   return (b.heat ?? 0) - (a.heat ?? 0) || byActivity(a, b);

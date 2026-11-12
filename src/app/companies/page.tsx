@@ -4,7 +4,7 @@ import { ContextRail } from "@/components/ContextRail";
 import { PageHead, Crumbs } from "@/components/ui";
 import { companies as mockCompanies } from "@/data/mock";
 import { api } from "@/lib/api";
-import { heatVisible, byActivity, byHeat } from "@/lib/heat";
+import { heatVisible, heatTone, byActivity, byHeat } from "@/lib/heat";
 
 export default async function Companies() {
   const live = await api.companies();
@@ -30,7 +30,7 @@ export default async function Companies() {
             <Link key={c.id} href={`/companies/${c.id}`} className={`grid ${cols} items-center px-4 py-3 border-b border-linesoft last:border-0 hover:bg-cardhi`}>
               <span className="min-w-0 truncate"><span className="text-[13px] font-bold">{c.ticker ?? c.name}</span> {c.ticker && <span className="text-[12px] text-muted ml-1.5">{c.name}</span>}</span>
               <span className="hidden md:block text-[12px] text-sub">{c.sector}</span>
-              {showHeat && <span className="text-right text-[13px] font-bold" style={{ color: c.heat >= 80 ? "#22c55e" : c.heat >= 60 ? "#f59e0b" : "#a3a3a3" }}>{c.heat}</span>}
+              {showHeat && <span className={`text-right text-[13px] font-bold tabular-nums ${heatTone(c.heat)}`}>{c.heat}</span>}
               <span className="text-right text-[12px] text-sub">{c.eventsToday}</span>
               <span className="text-right text-[12px]" style={{ color: c.watched ? "#00ff88" : "#808080" }}>{c.watched ? "★" : "☆"}</span>
             </Link>

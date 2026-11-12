@@ -4,16 +4,9 @@ import Link from "next/link";
 import { companies as mockCompanies, themes as mockThemes } from "@/data/mock";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
-import { heatVisible, byActivity, byHeat } from "@/lib/heat";
+import { heatVisible, heatTone, byActivity, byHeat } from "@/lib/heat";
 import { Help } from "@/components/Help";
 import type { Company, Theme } from "@/lib/types";
-
-function heatColor(h: number) {
-  if (h >= 80) return "text-pos";
-  if (h >= 60) return "text-amber";
-  if (h >= 40) return "text-sub";
-  return "text-muted";
-}
 
 type RailData = { companies: Company[]; themes: Theme[]; live: boolean };
 
@@ -77,7 +70,7 @@ export function ContextRail() {
               {c.eventsToday ? `${c.eventsToday} event${c.eventsToday === 1 ? "" : "s"} today` : "no events today"}
             </div>
           </div>
-          {showHeat && <div className={cn("text-[13px] font-bold tabular-nums", heatColor(c.heat))}>{c.heat}</div>}
+          {showHeat && <div className={cn("text-[13px] font-bold tabular-nums", heatTone(c.heat))}>{c.heat}</div>}
         </Link>
       ))}
 

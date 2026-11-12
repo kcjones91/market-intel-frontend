@@ -33,10 +33,8 @@ export const GLOSSARY = {
   heat: {
     title: "Heat",
     body:
-      "A score from 0 to 100 for how much is happening around a company or theme. " +
-      "It is recalculated every night from the events linked to that name over the last 7 days. " +
-      "More important events count for much more, and an event counts for half as much every 2 days. " +
-      "Events the scoring model has not read yet are left out. " +
+      "A score from 0 to 100 for how much is happening around a company or theme, worked out from the events linked to it. " +
+      "More important events count for much more, and events that have not been scored yet are left out. " +
       "Heat measures activity only. It does not say whether that activity is good or bad for anyone.",
     points: ["Counts events from the last 7 days", "An event's weight halves every 2 days", "Updated once a night"],
   },

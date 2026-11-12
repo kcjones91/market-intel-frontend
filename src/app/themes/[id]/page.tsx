@@ -31,7 +31,7 @@ export default async function ThemeView({ params }: { params: { id: string } }) 
           <div>
             <div className="text-[26px] font-extrabold text-theme">{t.name}</div>
             <div className="text-[12px] text-muted mt-0.5">{t.eventsToday} event{t.eventsToday === 1 ? "" : "s"} today{showHeat ? ` · ${t.heat} / 100 heat` : ""}</div>
-            {showHeat && <Spark data={t.heatTrend} />}
+            {showHeat && t.heatTrend?.length > 1 && <><Spark data={t.heatTrend} /><div className="text-[12px] text-muted mt-1">Daily heat, last {t.heatTrend.length} days</div></>}
           </div>
           {showHeat && (
             <div className="text-right">

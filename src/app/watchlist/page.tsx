@@ -4,7 +4,7 @@ import { ContextRail } from "@/components/ContextRail";
 import { PageHead, Crumbs } from "@/components/ui";
 import { companies as mockCompanies, events as mockEvents } from "@/data/mock";
 import { api, allEvents } from "@/lib/api";
-import { heatVisible, byActivity, byHeat } from "@/lib/heat";
+import { heatVisible, heatTone, byActivity, byHeat } from "@/lib/heat";
 
 export default async function Watchlist() {
   const [live, today] = await Promise.all([api.companies(), api.today()]);
@@ -31,7 +31,7 @@ export default async function Watchlist() {
                   <span className="text-[15px] font-bold text-pos">{c.ticker ?? c.name}</span>
                   <span className="text-[12px] text-muted">{c.name} · {c.sector}</span>
                 </div>
-                {showHeat && <div className="text-[16px] font-extrabold" style={{ color: c.heat >= 80 ? "#22c55e" : c.heat >= 60 ? "#f59e0b" : "#a3a3a3" }}>{c.heat}</div>}
+                {showHeat && <div className={`text-[16px] font-extrabold tabular-nums ${heatTone(c.heat)}`}>{c.heat}</div>}
               </div>
               {showHeat && <div className="h-[5px] bg-line rounded overflow-hidden mb-2"><div className="h-full bg-mint/80" style={{ width: `${c.heat}%` }} /></div>}
               <div className="text-[12px] text-muted">

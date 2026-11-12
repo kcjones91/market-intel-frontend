@@ -30,11 +30,11 @@ export default async function CompanyView({ params }: { params: { id: string } }
           <div>
             <div className="text-[26px] font-extrabold">{label}</div>
             <div className="text-[12px] text-muted mt-0.5">{c.name} · {c.sector} · {c.watched ? "on watchlist" : "not watched"}</div>
-            {showHeat && <Spark data={c.heatTrend} />}
+            {showHeat && c.heatTrend?.length > 1 && <><Spark data={c.heatTrend} /><div className="text-[12px] text-muted mt-1">Daily heat, last {c.heatTrend.length} days</div></>}
           </div>
           {showHeat ? (
             <div className="text-right">
-              <div className="text-[30px] font-extrabold text-pos">{c.heat}</div>
+              <div className="text-[30px] font-extrabold tabular-nums">{c.heat}</div>
               <div className="text-[12px] tracking-wide text-muted whitespace-nowrap">HEAT · 7D <Help term="heat" /></div>
             </div>
           ) : (

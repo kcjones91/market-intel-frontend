@@ -91,7 +91,8 @@ they run with fresh context so the work is not grading itself.
   `src/app/alerts/page.tsx`) because the only rules and firings in the backend are seed rows.
   In sample mode "+ New rule" and the rule toggles are still dead. Watch stars are not toggles.
 - Graph is hard to read on phones. Tags and breadcrumb links are under the 40px touch target.
-- UI second pass: heat still uses the gain colour, internal ids in breadcrumbs, price formatting.
+- UI second pass: internal ids in breadcrumbs, price formatting, no heat "?" on the phone list
+  pages, the 7 day heat window is labelled three different ways.
 - Heat is shown on live pages (`HEAT_IS_CALCULATED` in `src/lib/heat.ts`) and needs backend
   v0.2.8 or later, whose nightly heat job calculates it. The glossary's heat entry mirrors that
   job's defaults (7 day window, 2 day half life); if they are tuned, update the entry.
