@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 
 export function Crumbs({ items }: { items: { href?: string; label: string }[] }) {
   return (
-    <div className="flex flex-wrap items-center gap-[7px] text-[11px] text-muted mb-3 break-all">
+    <div className="flex flex-wrap items-center gap-[7px] text-[12px] text-muted mb-3 break-all">
       {items.map((it, i) => {
         const last = i === items.length - 1;
         return (
@@ -27,7 +27,7 @@ export function PageHead({ title, stamp }: { title: string; stamp?: string }) {
   return (
     <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
       <h1 className="text-[18px] font-bold">{title}</h1>
-      {stamp && <div className="text-[11px] text-sub tracking-wide">{stamp}</div>}
+      {stamp && <div className="text-[12px] text-sub tracking-wide">{stamp}</div>}
     </div>
   );
 }
@@ -37,7 +37,7 @@ export function TickerTag({ id, label }: { id: string; label: string }) {
     <Link
       href={`/companies/${id}`}
       onClick={(e) => e.stopPropagation()}
-      className="text-[10px] font-bold px-[7px] py-0.5 rounded border border-pos/40 bg-pos/[0.06] text-pos hover:bg-pos/15"
+      className="text-[12px] font-bold px-[7px] py-0.5 rounded border border-pos/40 bg-pos/[0.06] text-pos hover:bg-pos/15"
     >
       {label}
     </Link>
@@ -48,7 +48,7 @@ export function ThemeTag({ id, label }: { id: string; label: string }) {
     <Link
       href={`/themes/${id}`}
       onClick={(e) => e.stopPropagation()}
-      className="text-[10px] font-bold px-[7px] py-0.5 rounded border border-theme/40 bg-theme/[0.06] text-theme hover:bg-theme/15"
+      className="text-[12px] font-bold px-[7px] py-0.5 rounded border border-theme/40 bg-theme/[0.06] text-theme hover:bg-theme/15"
     >
       {label}
     </Link>
@@ -65,8 +65,9 @@ export function Spark({ data }: { data: number[] }) {
   );
 }
 
+// Importance is not gain or loss, so it never uses the loss colour.
 const scoreColor = (p: IntelEvent["priority"]) =>
-  p === "high" ? "text-neg" : p === "med" ? "text-amber" : "text-muted";
+  p === "high" ? "text-amber" : p === "med" ? "text-ink" : "text-muted";
 
 // The whole card is clickable, but it is not itself a link: the title link is
 // stretched over the card with ::after, and the tag links sit above it. The
@@ -76,20 +77,20 @@ const scoreColor = (p: IntelEvent["priority"]) =>
 export function EventCard({ ev }: { ev: IntelEvent }) {
   return (
     <div className="relative bg-card border border-line rounded-[9px] px-4 py-[15px] mb-3 hover:border-[#333] transition-colors">
-      <div className="text-[10px] tracking-wide text-muted uppercase">
+      <div className="text-[12px] tracking-wide text-muted uppercase">
         <span className="text-sub">{ev.sourceLabel}</span> · {ev.docType}
       </div>
       <Link
         href={`/event/${ev.id}`}
-        className="block font-sans text-[15px] font-semibold my-[7px] leading-snug max-w-[82%] md:max-w-[88%] after:absolute after:inset-0 after:content-['']"
+        className="block font-sans text-[15px] font-semibold my-[7px] leading-snug max-w-[72%] md:max-w-[86%] after:absolute after:inset-0 after:content-['']"
       >
         {ev.title}
       </Link>
       <div className="font-sans text-[12.5px] text-sub leading-relaxed md:max-w-[92%]">{ev.summary}</div>
 
       <div className="absolute top-[14px] right-4 text-right pointer-events-none">
-        <div className={cn("text-[19px] font-extrabold leading-none", scoreColor(ev.priority))}>{ev.importance}</div>
-        <div className="text-[9px] tracking-wide text-faint mt-0.5">IMPORTANCE</div>
+        <div className={cn("text-[19px] font-extrabold leading-none tabular-nums", scoreColor(ev.priority))}>{ev.importance}</div>
+        <div className="font-sans text-[12px] text-muted mt-1">importance</div>
       </div>
 
       <div className="flex items-center justify-between mt-3">
@@ -97,7 +98,7 @@ export function EventCard({ ev }: { ev: IntelEvent }) {
           {ev.entities.filter(e => e.kind === "company").map(e => <TickerTag key={e.id} id={e.id} label={e.label} />)}
           {ev.themes.map(t => <ThemeTag key={t} id={t} label={t.toUpperCase()} />)}
         </div>
-        <div className="text-[10.5px] text-faint whitespace-nowrap">{ev.time} · conf {ev.confidence}</div>
+        <div className="text-[12px] text-muted whitespace-nowrap">{ev.time} · confidence {ev.confidence}</div>
       </div>
     </div>
   );

@@ -5,17 +5,17 @@ handoff doc or chat summary that disagrees with this file or with `git log` is s
 
 ## Source of truth
 
-- Code: this repo, `main`. A version is a git tag `vX.Y.Z`. Current release: `v0.1.1`.
+- Code: this repo, `main`. A version is a git tag `vX.Y.Z`. Current release: `v0.1.2`.
 - Deploy: a pushed tag runs `.github/workflows/build.yml`, which builds, smoke-tests and pushes
   `ghcr.io/kcjones91/market-intel-frontend:<tag>`. The running version is the tag pinned in
   `kcjones91/k8s-applications` at `apps/market-intel/03-frontend.yaml`; ArgoCD syncs it to
   swipe-lab (namespace `market-intel`, Deployment `intel-web`).
 - Live: https://intel.munnymoves.com, behind Cloudflare Access (email one-time PIN, allow list).
-  Also NodePort 30840 on any swipe-lab node, LAN and Tailscale only, no login.
+  It is also served inside the home network and tailnet; details are in `k8s-applications`.
   Which build is serving:
   `kubectl -n market-intel get deploy intel-web -o jsonpath='{.spec.template.spec.containers[0].image}'`
 - Kyle's clones (WSL): `/mnt/c/Users/kjon5/projects/market-intel-frontend` and
-  `/mnt/c/engex/code/k8s-applications`. kubectl and argocd run on `swipe-master-1`.
+  `/mnt/c/engex/code/k8s-applications`. kubectl and argocd run on the cluster's control node.
 
 ## Architecture in one paragraph
 
@@ -24,9 +24,10 @@ rendered per request (`dynamic = "force-dynamic"` in the root layout). Server vi
 FastAPI backend (`kcjones91/market-intel-backend`, Service `intel-api`) using `API_INTERNAL_URL`,
 read at runtime. Browser views (Search, Graph, the context rail) call same-origin `/api/*`, which
 `src/app/api/[...path]/route.ts` forwards to the backend (GET and POST only). `src/lib/api.ts`
-returns data, `null` (no API configured, or 404) or throws (API configured but failing). Mock data
-in `src/data/mock.ts` renders only when no API is configured; a failing API shows an error, never
-mock. No auth in the app itself: Cloudflare Access is the gate. The backend ingests Congress.gov
+returns data, `null` (no API configured; also a 404 on a single-record call) or throws (API
+configured but failing, including a 404 on a list endpoint). Mock data
+in `src/data/mock.ts` renders only when no API is configured, under a site-wide SAMPLE DATA banner;
+a failing API shows an error, never mock. No auth in the app itself: Cloudflare Access is the gate. The backend ingests Congress.gov
 and SEC EDGAR nightly and scores events with a local LLM. The Munny Moves newsletter is a
 separate pipeline. `WIRING.md` has the view to endpoint map.
 
@@ -46,13 +47,17 @@ separate pipeline. `WIRING.md` has the view to endpoint map.
   as live data.
 - Design tokens: colours and font stacks in `tailwind.config.ts`, base styles in
   `src/app/globals.css`. Type sizes and spacing are inline Tailwind values, with no scale file
-  yet. One dark theme only.
+  yet. One dark theme only. Minimum text size is 12px. Greys: `sub` and `muted` for text,
+  `faint` for separators only. `neg` and `pos` mean loss and gain; importance never uses `neg`.
 
 ## How changes ship
 
 Claude works on a branch, runs the checks above (and `scripts/ui_smoke.py` for anything visual),
-pushes and opens a PR with `gh api repos/kcjones91/market-intel-frontend/pulls` (`gh pr create`
-uses GraphQL and is blocked from sessions). Kyle merges. `check.yml` runs on the PR and on `main`.
+then has the review agents go over the diff and fixes what they find. It pushes and opens a PR
+with `gh api repos/kcjones91/market-intel-frontend/pulls` (`gh pr create` uses GraphQL and is
+blocked from sessions). Once `check.yml` is green on the PR, Claude merges it (Kyle asked for
+this on 2026-11-11) and tells Kyle what merged. A red gating job or an unresolved review finding
+means no merge. `check.yml` runs again on `main`.
 
 Release (after merge, never from an unmerged branch): sessions cannot push tags, so Kyle runs
 `git pull && git tag vX.Y.Z && git push origin vX.Y.Z && gh run watch`. When the build is green,
@@ -74,8 +79,10 @@ the work is not grading itself.
 - `npm audit --omit=dev` reports Next.js advisories whose fix is a major upgrade (14 to 16).
 - Backend stores the Congress data API address as `docUrl`; `src/lib/links.ts` maps it to the
   public bill page at render time. Fix at the source in the Congress worker, then backfill.
-- Not functional yet: Ask the Analyst, "+ New rule", Reports, World Events.
-- Graph is hard to read on phones; search example chips are 26px tall (under the 40px target).
+- Ask the Analyst is removed until it works. Reports and World Events are out of the nav.
+  Still dead on Alerts: "+ New rule", rule toggles. Watch stars are not toggles.
+- Graph is hard to read on phones. Tags and breadcrumb links are under the 40px touch target.
+- UI second pass: heat still uses the gain colour, internal ids in breadcrumbs, price formatting.
 - `build.yml` still uses `actions/checkout@v4`; `check.yml` uses v7.
-- Cloudflare: move munnymoves.com to its own account so readers do not see Kinesics branding.
+- Cloudflare: move munnymoves.com to its own Cloudflare account, with its own login branding.
 - Stage 2: per-reader watchlists and alerts, identity from the Cloudflare Access header.

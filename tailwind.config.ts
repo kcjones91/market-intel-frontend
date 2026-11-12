@@ -11,9 +11,9 @@ const config: Config = {
         line: "#1f1f1f",
         linesoft: "#181818",
         ink: "#e8e8e8",
-        sub: "#8a8a8a",
-        muted: "#5f5f5f",
-        faint: "#444444",
+        sub: "#a3a3a3",      // secondary text, 7.4:1 on card
+        muted: "#808080",    // metadata and labels, 4.7:1 on card (AA)
+        faint: "#6e6e6e",    // separators and decoration only, never text that carries information
         mint: "#00ff88",
         pos: "#22c55e",
         neg: "#ff5000",

@@ -42,6 +42,9 @@ function layout(nodes: GraphNode[]): { pos: Record<string, Pt>; height: number }
   return { pos, height };
 }
 
+const NO_NODES: GraphNode[] = [];
+const NO_EDGES: Edge[] = [];
+
 export default function Graph() {
   const router = useRouter();
   const [focus, setFocus] = useState<string | null>(null);
@@ -61,30 +64,25 @@ export default function Graph() {
     return () => { cancelled = true; };
   }, []);
 
-  const nodes = graph?.nodes ?? [];
-  const edges = graph?.edges ?? [];
+  const nodes = graph?.nodes ?? NO_NODES;
+  const edges = graph?.edges ?? NO_EDGES;
   const { pos, height } = useMemo(() => layout(nodes), [nodes]);
+  const ids = useMemo(() => new Set(nodes.map((n) => n.id)), [nodes]);
 
   const neighbors = focus
-    ? new Set(edges.filter((e) => e.a === focus || e.b === focus).flatMap((e) => [e.a, e.b]))
+    ? new Set([focus, ...edges.filter((e) => (e.a === focus || e.b === focus) && ids.has(e.a) && ids.has(e.b)).flatMap((e) => [e.a, e.b])])
     : null;
-  const focusLabel = focus ? nodes.find((n) => n.id === focus)?.label ?? focus : "Graph";
 
-  const rail = (
-    <ContextRail
-      scopeLabel={focusLabel}
-      suggestions={focus ? ["Strongest connections", "Path to government funding", "Co-occurring entities"] : ["Most connected entity", "Quantum cluster overview", "Agencies funding watched names"]}
-    />
-  );
+  const rail = <ContextRail />;
 
   return (
     <ViewFrame rail={rail}>
       <div className="px-4 md:px-[26px] py-[18px]">
         <Crumbs items={[{ label: "Graph" }]} />
         <PageHead title="Relationship Graph" stamp="CO-OCCURRENCE · TYPED EDGES" />
-        <div className="text-[12px] text-sub mt-1.5">Click a node to focus its neighborhood. Edges link entities that appear together or fund/contract each other.</div>
+        <div className="text-[12px] text-sub mt-1.5">Select a node to focus its neighborhood. Edges link entities that appear together or fund/contract each other.</div>
 
-        <div className="flex gap-3 text-[10px] text-muted mt-3 mb-2">
+        <div className="flex gap-3 text-[12px] text-muted mt-3 mb-2">
           <span><span className="inline-block w-2 h-2 rounded-full align-middle mr-1" style={{ background: COLOR.company }} />Company</span>
           <span><span className="inline-block w-2 h-2 rounded-full align-middle mr-1" style={{ background: COLOR.theme }} />Theme</span>
           <span><span className="inline-block w-2 h-2 rounded-full align-middle mr-1" style={{ background: COLOR.govbody }} />Government</span>
@@ -98,8 +96,9 @@ export default function Graph() {
           ) : nodes.length === 0 ? (
             <div className="text-muted text-[12.5px] py-16 text-center">No relationships recorded yet.</div>
           ) : (
-            <svg width="100%" viewBox={`0 0 700 ${height}`} className="select-none">
+            <svg width="100%" viewBox={`0 0 700 ${height}`} className="select-none" onClick={() => setFocus(null)}>
               {edges.map((e, i) => {
+                if (!ids.has(e.a) || !ids.has(e.b)) return null;   // skip edges whose node is missing
                 const a = pos[e.a], b = pos[e.b];
                 if (!a || !b) return null;
                 const dim = neighbors && !(neighbors.has(e.a) && neighbors.has(e.b));
@@ -109,21 +108,24 @@ export default function Graph() {
               {nodes.map((n) => {
                 const p = pos[n.id]; if (!p) return null;
                 const dim = neighbors && !neighbors.has(n.id);
-                const color = COLOR[n.kind] ?? "#8a8a8a";
+                const color = COLOR[n.kind] ?? "#a3a3a3";
                 const id = encodeURIComponent(n.id);
                 return (
                   <g key={n.id} style={{ cursor: "pointer", opacity: dim ? 0.3 : 1 }}
-                     onClick={() => setFocus(focus === n.id ? null : n.id)}
-                     onDoubleClick={() => router.push(n.kind === "theme" ? `/themes/${id}` : n.kind === "company" ? `/companies/${id}` : `/government/${id}`)}>
+                     onClick={(ev) => {
+                       ev.stopPropagation();
+                       if (focus !== n.id) { setFocus(n.id); return; }
+                       router.push(n.kind === "theme" ? `/themes/${id}` : n.kind === "company" ? `/companies/${id}` : `/government/${id}`);
+                     }}>
                     <circle cx={p.x} cy={p.y} r={focus === n.id ? 8 : 6} fill={color} stroke={focus === n.id ? "#fff" : "none"} strokeWidth={1} />
-                    <text x={p.x + 11} y={p.y + 4} fill="#ccc" fontSize={11} fontFamily="monospace">{n.label}</text>
+                    <text x={p.x + 11} y={p.y + 4} fill="#ccc" fontSize={12} fontFamily="monospace">{n.label}</text>
                   </g>
                 );
               })}
             </svg>
           )}
         </div>
-        <div className="text-[10px] text-faint mt-2">Single-click to focus · double-click to open the entity</div>
+        <div className="text-[12px] text-muted mt-2">Select a node to focus it · select it again to open it · select empty space to clear</div>
       </div>
     </ViewFrame>
   );

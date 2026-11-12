@@ -1,14 +1,15 @@
 "use client";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 
-type Item = { href: string; label: string; count?: number; alert?: boolean; soon?: boolean };
+type Item = { href: string; label: string; also?: string[] };
 
-// Counts are optional. The old hardcoded sample counts (14, 6, 3, 3) were
-// removed so the nav never shows numbers that do not come from live data.
+// Only views that work are listed. Reports and World Events still exist as
+// routes but stay out of the nav until they do something.
 const PRIMARY: Item[] = [
-  { href: "/", label: "Dashboard" },
+  { href: "/", label: "Dashboard", also: ["/event"] },   // event pages are reached from the dashboard
   { href: "/watchlist", label: "Watchlist" },
   { href: "/companies", label: "Companies" },
   { href: "/themes", label: "Themes" },
@@ -16,44 +17,74 @@ const PRIMARY: Item[] = [
   { href: "/graph", label: "Graph" },
   { href: "/search", label: "Search" },
   { href: "/alerts", label: "Alerts" },
-  { href: "/reports", label: "Reports", soon: true },
-  { href: "/world", label: "World Events", soon: true },
 ];
+
+// Matches a whole path segment, so "/themes" matches "/themes/x" but not "/themes-foo".
+const under = (path: string, base: string) => path === base || path.startsWith(base + "/");
+
+export function isActive(path: string, it: Item) {
+  if (it.href === "/") return path === "/" || (it.also ?? []).some((p) => under(path, p));
+  return under(path, it.href);
+}
 
 export function Nav() {
   const path = usePathname();
+  const row = useRef<HTMLDivElement>(null);
+  const [more, setMore] = useState({ left: false, right: true });
+
+  // On phones the views are a sideways-scrolling row. Keep the active one in
+  // view. Scroll the row itself rather than calling scrollIntoView, which
+  // would also move the page.
+  useEffect(() => {
+    const el = row.current;
+    const active = el?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!el || !active || el.scrollWidth <= el.clientWidth) return;
+    // Measure against the row itself so this stays right if the nav's own layout changes.
+    const a = active.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    const target = el.scrollLeft + (a.left - r.left) - (el.clientWidth - a.width) / 2;
+    el.scrollLeft = Math.max(0, Math.min(target, el.scrollWidth - el.clientWidth));
+  }, [path]);
+
+  // Fade an edge only while there are tabs hidden beyond it.
+  useEffect(() => {
+    const el = row.current;
+    if (!el) return;
+    const update = () => {
+      const max = el.scrollWidth - el.clientWidth;
+      setMore({ left: el.scrollLeft > 2, right: el.scrollLeft < max - 2 });
+    };
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => { el.removeEventListener("scroll", update); window.removeEventListener("resize", update); };
+  }, [path]);
+
   return (
     <nav className="bg-rail border-b md:border-b-0 md:border-r border-line sticky top-0 z-30 md:h-screen md:overflow-y-auto pane md:py-4 select-none">
       <Link href="/" className="block px-4 pt-3 pb-1.5 md:pt-0 md:pb-5">
-        <div className="text-mint text-[15px] font-extrabold tracking-[0.12em]">◢ MARKET INTEL</div>
-        <div className="hidden md:block text-muted text-[9px] tracking-[0.2em] mt-0.5">OSINT WORKSPACE</div>
+        <div className="text-mint text-[15px] md:text-[13px] font-extrabold tracking-[0.1em] md:tracking-[0.04em] whitespace-nowrap">◢ MUNNY MOVES INTEL</div>
+        <div className="hidden md:block text-muted text-[12px] tracking-[0.12em] mt-1">OSINT WORKSPACE</div>
       </Link>
 
-      <div className="hidden md:block text-faint text-[9px] tracking-[0.15em] px-4 pb-1.5">VIEWS</div>
-      <div className="flex md:block overflow-x-auto md:overflow-visible no-scrollbar px-1 md:px-0">
-      {PRIMARY.map((it) => {
-        const active = it.href === "/" ? path === "/" : path.startsWith(it.href);
-        return (
-          <Link
-            key={it.href}
-            href={it.href}
-            className={cn(
-              "flex shrink-0 items-center justify-between whitespace-nowrap px-3 md:px-4 py-2 md:py-[7px] text-[12.5px] border-b-2 md:border-b-0 md:border-l-2 border-transparent",
-              active ? "text-mint border-mint bg-mint/[0.04]" : "text-sub hover:text-ink hover:bg-linesoft"
-            )}
-          >
-            <span className="flex items-center gap-2">
+      <div className="hidden md:block text-muted text-[12px] tracking-[0.12em] px-4 pb-1.5">VIEWS</div>
+      <div ref={row} className="nav-row flex md:block overflow-x-auto md:overflow-visible no-scrollbar px-1 md:px-0" style={{ "--fade-l": more.left ? "32px" : "0px", "--fade-r": more.right ? "32px" : "0px" } as React.CSSProperties}>
+        {PRIMARY.map((it) => {
+          const active = isActive(path, it);
+          return (
+            <Link
+              key={it.href}
+              href={it.href}
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "flex shrink-0 items-center whitespace-nowrap px-3 md:px-4 min-h-[44px] md:min-h-[36px] text-[13px] border-b-2 md:border-b-0 md:border-l-2 border-transparent",
+                active ? "text-mint border-mint bg-mint/[0.04]" : "text-sub hover:text-ink hover:bg-linesoft"
+              )}
+            >
               {it.label}
-              {it.soon && <span className="text-[8px] text-faint tracking-wide">SOON</span>}
-            </span>
-            {it.count != null && (
-              <span className={cn("text-[11px]", it.alert ? "text-neg" : active ? "text-mint" : "text-muted")}>
-                {it.count}
-              </span>
-            )}
-          </Link>
-        );
-      })}
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );

@@ -8,7 +8,7 @@ import { api } from "@/lib/api";
 export default async function Themes() {
   const themes = (await api.themes()) ?? mockThemes;
   const rows = [...themes].sort((a, b) => b.heat - a.heat);
-  const rail = <ContextRail scopeLabel="Themes" suggestions={["Hottest theme this week", "Which companies lead Quantum?", "Emerging themes by event velocity"]} />;
+  const rail = <ContextRail />;
 
   return (
     <ViewFrame rail={rail}>
@@ -23,7 +23,7 @@ export default async function Themes() {
               <span className="text-[16px] font-extrabold">{t.heat}</span>
             </div>
             <div className="h-[5px] bg-line rounded overflow-hidden"><div className="h-full bg-theme/80" style={{ width: `${t.heat}%` }} /></div>
-            <div className="text-[11px] text-muted mt-2">{t.eventsToday} event{t.eventsToday === 1 ? "" : "s"} today</div>
+            <div className="text-[12px] text-muted mt-2">{t.eventsToday} event{t.eventsToday === 1 ? "" : "s"} today</div>
           </Link>
         ))}
       </div>

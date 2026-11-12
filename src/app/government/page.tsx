@@ -12,7 +12,7 @@ const kindColor: Record<string, string> = {
 
 export default async function Government() {
   const govbodies = (await api.government()) ?? mockGov;
-  const rail = <ContextRail scopeLabel="Government" suggestions={["Which watched names are most gov-exposed?", "Open solicitations by theme", "New contracts this week"]} />;
+  const rail = <ContextRail />;
 
   return (
     <ViewFrame rail={rail}>
@@ -23,12 +23,12 @@ export default async function Government() {
         {govbodies.length === 0 && <div className="text-muted text-[12.5px] py-10 text-center">No government activity tracked yet.</div>}
         {govbodies.map((g) => (
           <Link key={g.id} href={`/government/${encodeURIComponent(g.id)}`} className="block bg-card border border-line rounded-[9px] px-4 py-3.5 mb-2.5 hover:border-[#333]">
-            <div className="flex items-center gap-2 text-[10px] tracking-wide uppercase">
-              <span className="font-bold" style={{ color: kindColor[g.kind] ?? "#8a8a8a" }}>{g.kind}</span>
+            <div className="flex items-center gap-2 text-[12px] tracking-wide uppercase">
+              <span className="font-bold" style={{ color: kindColor[g.kind] ?? "#a3a3a3" }}>{g.kind}</span>
               <span className="text-muted">{g.agency} · {g.ref}</span>
             </div>
             <div className="font-sans text-[15px] font-semibold mt-1.5">{g.title}</div>
-            <div className="text-[11px] text-sub mt-1">{g.status}</div>
+            <div className="text-[12px] text-sub mt-1">{g.status}</div>
           </Link>
         ))}
       </div>

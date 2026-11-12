@@ -11,7 +11,7 @@ export default async function Watchlist() {
   const events = live ? allEvents(today) : mockEvents;
 
   const watched = companies.filter((c) => c.watched).sort((a, b) => b.heat - a.heat);
-  const rail = <ContextRail scopeLabel="Watchlist" suggestions={["Which names have rising heat?", "Top catalysts across watchlist today", "Compare IONQ vs RGTI activity"]} />;
+  const rail = <ContextRail />;
 
   return (
     <ViewFrame rail={rail}>
@@ -27,13 +27,13 @@ export default async function Watchlist() {
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-baseline gap-2.5">
                   <span className="text-[15px] font-bold text-pos">{c.ticker ?? c.name}</span>
-                  <span className="text-[11px] text-muted">{c.name} · {c.sector}</span>
+                  <span className="text-[12px] text-muted">{c.name} · {c.sector}</span>
                 </div>
-                <div className="text-[16px] font-extrabold" style={{ color: c.heat >= 80 ? "#22c55e" : c.heat >= 60 ? "#f59e0b" : "#8a8a8a" }}>{c.heat}</div>
+                <div className="text-[16px] font-extrabold" style={{ color: c.heat >= 80 ? "#22c55e" : c.heat >= 60 ? "#f59e0b" : "#a3a3a3" }}>{c.heat}</div>
               </div>
               <div className="h-[5px] bg-line rounded overflow-hidden mb-2"><div className="h-full bg-mint/80" style={{ width: `${c.heat}%` }} /></div>
-              <div className="text-[11px] text-muted">
-                {c.eventsToday ? `${c.eventsToday} events today` : "no events today"}
+              <div className="text-[12px] text-muted">
+                {c.eventsToday ? `${c.eventsToday} event${c.eventsToday === 1 ? "" : "s"} today` : "no events today"}
                 {recent.length ? " · " + recent.map((e) => e.title.split(" ").slice(0, 5).join(" ")).join(" · ") : ""}
               </div>
             </Link>

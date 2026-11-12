@@ -19,6 +19,14 @@ html, body { background: #0a0a0a; color: #e8e8e8; }
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
+/* phone nav: fade whichever edge has more tabs beyond it (Nav sets --fade-l / --fade-r) */
+@media (max-width: 767px) {
+  .nav-row {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l, 0px), #000 calc(100% - var(--fade-r, 0px)), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l, 0px), #000 calc(100% - var(--fade-r, 0px)), transparent 100%);
+  }
+}
+
 /* never let a wide child push the page sideways on phones */
 body { overflow-x: clip; }
 
