@@ -6,8 +6,8 @@
 // link. Bills and resolutions map cleanly to their public congress.gov page.
 //
 // Stored addresses are untrusted. A link is rendered only for an http(s)
-// address, with no embedded credentials, on a host readers should be sent to
-// (see READER_HOST below). Everything else is shown as plain text.
+// address, with no embedded credentials or port, on a host readers should be
+// sent to (see READER_DOMAINS below). Everything else is shown as plain text.
 
 const BILL_SLUGS = new Map<string, string>([
   ["hr", "house-bill"],
@@ -21,11 +21,14 @@ const BILL_SLUGS = new Map<string, string>([
 ]);
 
 // Hosts that serve machine data, not pages for readers.
-const API_HOSTS = new Set(["api.congress.gov", "data.sec.gov", "api.govinfo.gov", "api.federalregister.gov"]);
+const API_HOSTS = new Set(["api.congress.gov", "data.sec.gov", "api.govinfo.gov", "api.federalregister.gov", "api.data.gov"]);
 
-// The app's sources are US government publishers, so reader links go to .gov
-// sites only. Add a host here deliberately when a new source needs one.
-const READER_HOST = /\.gov$/;
+// Reader links go only to the publishers the app ingests from (and their
+// subdomains). A broader rule such as "any .gov site" would let a poisoned
+// address ride an open redirect on some unrelated government site. Add a host
+// here deliberately when a new source needs one.
+const READER_DOMAINS = ["congress.gov", "sec.gov", "govinfo.gov", "federalregister.gov"];
+const isReaderHost = (host: string) => READER_DOMAINS.some((d) => host === d || host.endsWith("." + d));
 
 export function ordinal(n: number): string {
   const tens = n % 100;
@@ -66,8 +69,9 @@ function linkTo(href: string): SourceLink {
  * @param docUrl the event's stored document address
  * @param eventId the event id, used as a fallback for Congress items ("congress:119:hr:10006")
  */
-export function sourceLink(docUrl: string | null | undefined, eventId?: string): SourceLink {
-  const raw = (docUrl ?? "").trim().slice(0, 2000);
+export function sourceLink(docUrl: unknown, eventId?: unknown): SourceLink {
+  const raw = (typeof docUrl === "string" ? docUrl : "").trim().slice(0, 2000);
+  const id = typeof eventId === "string" ? eventId : "";
 
   let u: URL | null = null;
   try {
@@ -79,13 +83,13 @@ export function sourceLink(docUrl: string | null | undefined, eventId?: string):
 
   const host = u.hostname.toLowerCase().replace(/\.$/, "");
   const web = u.protocol === "http:" || u.protocol === "https:";
-  const clean = web && !u.username && !u.password;
+  const clean = web && !u.username && !u.password && u.port === "";   // default ports only
   if (!clean) return { href: null, label: host || raw };
 
   if (API_HOSTS.has(host)) {
     // Congress bill, from the API address, then from the event id.
     const fromUrl = host === "api.congress.gov" ? u.pathname.match(/^\/v\d+\/bill\/(\d+)\/([a-z]+)\/(\d+)\/?$/i) : null;
-    const fromId = (eventId ?? "").match(/^congress:(\d+):([a-z]+):(\d+)$/i);
+    const fromId = id.match(/^congress:(\d+):([a-z]+):(\d+)$/i);
     for (const m of [fromUrl, fromId]) {
       const href = m ? congressBillUrl(m[1], m[2], m[3]) : null;
       if (href) return linkTo(href);
@@ -93,6 +97,6 @@ export function sourceLink(docUrl: string | null | undefined, eventId?: string):
     return { href: null, label: host.replace(/^(api|data)\./, "") };
   }
 
-  if (READER_HOST.test(host)) return { href: u.href, label: pretty(u) };
+  if (isReaderHost(host)) return { href: u.href, label: pretty(u) };
   return { href: null, label: pretty(u) };
 }
