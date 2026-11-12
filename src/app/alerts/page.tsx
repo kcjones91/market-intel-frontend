@@ -5,7 +5,7 @@ import { Crumbs, PageHead } from "@/components/ui";
 import { triggeredAlerts as mockTriggered, alertRules as mockRules } from "@/data/mock";
 import { api } from "@/lib/api";
 
-const channelColor: Record<string, string> = { discord: "#5865F2", slack: "#36C5F0", email: "#8a8a8a", telegram: "#229ED9" };
+const channelColor: Record<string, string> = { discord: "#8a93ff", slack: "#36C5F0", email: "#a3a3a3", telegram: "#229ED9" };
 
 export default async function Alerts() {
   const data = await api.alerts();
@@ -39,7 +39,7 @@ export default async function Alerts() {
         <div className="text-[12px] tracking-[0.15em] text-sub uppercase mt-7 mb-3 border-t border-line pt-[18px]">Rules</div>
         {alertRules.length === 0 && <div className="text-muted text-[12.5px] py-6 text-center">No alert rules defined.</div>}
         {alertRules.map((r) => (
-          <div key={r.id} className="flex justify-between items-center bg-card border border-line rounded-[9px] px-4 py-3 mb-2.5">
+          <div key={r.id} className="flex flex-col gap-2.5 sm:flex-row sm:justify-between sm:items-center bg-card border border-line rounded-[9px] px-4 py-3 mb-2.5">
             <div>
               <div className="text-[13px] font-semibold">{r.name}</div>
               <div className="text-[12px] text-muted mt-0.5">{r.scopeKind} · {r.scopeValue}</div>
@@ -47,10 +47,10 @@ export default async function Alerts() {
             <div className="flex items-center gap-3">
               <div className="flex gap-1.5">
                 {r.channels.map((ch) => (
-                  <span key={ch} className="text-[12px] font-bold px-1.5 py-0.5 rounded uppercase" style={{ color: channelColor[ch] ?? "#8a8a8a", border: `1px solid ${channelColor[ch] ?? "#8a8a8a"}40` }}>{ch}</span>
+                  <span key={ch} className="text-[12px] font-bold px-1.5 py-0.5 rounded uppercase" style={{ color: channelColor[ch] ?? "#a3a3a3", border: `1px solid ${channelColor[ch] ?? "#a3a3a3"}40` }}>{ch}</span>
                 ))}
               </div>
-              <span className="text-[12px]" style={{ color: r.enabled ? "#00ff88" : "#444" }}>{r.enabled ? "ON" : "OFF"}</span>
+              <span className="text-[12px]" style={{ color: r.enabled ? "#00ff88" : "#808080" }}>{r.enabled ? "ON" : "OFF"}</span>
             </div>
           </div>
         ))}

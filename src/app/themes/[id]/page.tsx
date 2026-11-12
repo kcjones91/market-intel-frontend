@@ -32,7 +32,7 @@ export default async function ThemeView({ params }: { params: { id: string } }) 
           </div>
           <div className="text-right">
             <div className="text-[30px] font-extrabold text-theme">{t.heat}</div>
-            <div className="text-[12px] tracking-wide text-muted">THEME HEAT · 7D</div>
+            <div className="text-[12px] tracking-wide text-muted whitespace-nowrap">HEAT · 7D</div>
           </div>
         </div>
 

@@ -108,7 +108,7 @@ export default function Graph() {
               {nodes.map((n) => {
                 const p = pos[n.id]; if (!p) return null;
                 const dim = neighbors && !neighbors.has(n.id);
-                const color = COLOR[n.kind] ?? "#8a8a8a";
+                const color = COLOR[n.kind] ?? "#a3a3a3";
                 const id = encodeURIComponent(n.id);
                 return (
                   <g key={n.id} style={{ cursor: "pointer", opacity: dim ? 0.3 : 1 }}

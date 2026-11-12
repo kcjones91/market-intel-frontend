@@ -24,7 +24,7 @@ export default async function Government() {
         {govbodies.map((g) => (
           <Link key={g.id} href={`/government/${encodeURIComponent(g.id)}`} className="block bg-card border border-line rounded-[9px] px-4 py-3.5 mb-2.5 hover:border-[#333]">
             <div className="flex items-center gap-2 text-[12px] tracking-wide uppercase">
-              <span className="font-bold" style={{ color: kindColor[g.kind] ?? "#8a8a8a" }}>{g.kind}</span>
+              <span className="font-bold" style={{ color: kindColor[g.kind] ?? "#a3a3a3" }}>{g.kind}</span>
               <span className="text-muted">{g.agency} · {g.ref}</span>
             </div>
             <div className="font-sans text-[15px] font-semibold mt-1.5">{g.title}</div>

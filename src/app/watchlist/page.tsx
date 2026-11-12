@@ -29,7 +29,7 @@ export default async function Watchlist() {
                   <span className="text-[15px] font-bold text-pos">{c.ticker ?? c.name}</span>
                   <span className="text-[12px] text-muted">{c.name} · {c.sector}</span>
                 </div>
-                <div className="text-[16px] font-extrabold" style={{ color: c.heat >= 80 ? "#22c55e" : c.heat >= 60 ? "#f59e0b" : "#8a8a8a" }}>{c.heat}</div>
+                <div className="text-[16px] font-extrabold" style={{ color: c.heat >= 80 ? "#22c55e" : c.heat >= 60 ? "#f59e0b" : "#a3a3a3" }}>{c.heat}</div>
               </div>
               <div className="h-[5px] bg-line rounded overflow-hidden mb-2"><div className="h-full bg-mint/80" style={{ width: `${c.heat}%` }} /></div>
               <div className="text-[12px] text-muted">

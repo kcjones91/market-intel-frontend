@@ -17,13 +17,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="font-mono antialiased bg-bg text-ink">
-        {/* Sample data renders only when no API is configured. Say so on every page. */}
+        <Shell>{children}</Shell>
+        {/* Sample data renders only when no API is configured. Mark every page, at every scroll position. */}
         {!apiEnabled && (
-          <div role="status" className="bg-amber text-black text-[12px] font-bold tracking-[0.08em] text-center px-4 py-1.5">
-            SAMPLE DATA · no live feed is connected, so nothing on this page is real
+          <div role="status" className="fixed bottom-3 right-3 z-50 bg-ink text-black text-[12px] font-bold tracking-[0.08em] rounded px-2.5 py-1.5 shadow-lg pointer-events-none">
+            SAMPLE DATA · NOT LIVE
           </div>
         )}
-        <Shell>{children}</Shell>
       </body>
     </html>
   );

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
@@ -30,6 +30,7 @@ export function isActive(path: string, it: Item) {
 export function Nav() {
   const path = usePathname();
   const row = useRef<HTMLDivElement>(null);
+  const [more, setMore] = useState({ left: false, right: true });
 
   // On phones the views are a sideways-scrolling row. Keep the active one in
   // view. Scroll the row itself rather than calling scrollIntoView, which
@@ -45,15 +46,29 @@ export function Nav() {
     el.scrollLeft = Math.max(0, Math.min(target, el.scrollWidth - el.clientWidth));
   }, [path]);
 
+  // Fade an edge only while there are tabs hidden beyond it.
+  useEffect(() => {
+    const el = row.current;
+    if (!el) return;
+    const update = () => {
+      const max = el.scrollWidth - el.clientWidth;
+      setMore({ left: el.scrollLeft > 2, right: el.scrollLeft < max - 2 });
+    };
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => { el.removeEventListener("scroll", update); window.removeEventListener("resize", update); };
+  }, [path]);
+
   return (
     <nav className="bg-rail border-b md:border-b-0 md:border-r border-line sticky top-0 z-30 md:h-screen md:overflow-y-auto pane md:py-4 select-none">
       <Link href="/" className="block px-4 pt-3 pb-1.5 md:pt-0 md:pb-5">
-        <div className="text-mint text-[15px] md:text-[13px] font-extrabold tracking-[0.1em] md:tracking-[0.08em] whitespace-nowrap">◢ MUNNY MOVES INTEL</div>
+        <div className="text-mint text-[15px] md:text-[13px] font-extrabold tracking-[0.1em] md:tracking-[0.04em] whitespace-nowrap">◢ MUNNY MOVES INTEL</div>
         <div className="hidden md:block text-muted text-[12px] tracking-[0.12em] mt-1">OSINT WORKSPACE</div>
       </Link>
 
       <div className="hidden md:block text-muted text-[12px] tracking-[0.12em] px-4 pb-1.5">VIEWS</div>
-      <div ref={row} className="nav-row flex md:block overflow-x-auto md:overflow-visible no-scrollbar pl-1 pr-8 md:px-0">
+      <div ref={row} className="nav-row flex md:block overflow-x-auto md:overflow-visible no-scrollbar px-1 md:px-0" style={{ "--fade-l": more.left ? "32px" : "0px", "--fade-r": more.right ? "32px" : "0px" } as React.CSSProperties}>
         {PRIMARY.map((it) => {
           const active = isActive(path, it);
           return (

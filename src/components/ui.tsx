@@ -82,14 +82,15 @@ export function EventCard({ ev }: { ev: IntelEvent }) {
       </div>
       <Link
         href={`/event/${ev.id}`}
-        className="block font-sans text-[15px] font-semibold my-[7px] leading-snug max-w-[82%] md:max-w-[88%] after:absolute after:inset-0 after:content-['']"
+        className="block font-sans text-[15px] font-semibold my-[7px] leading-snug max-w-[72%] md:max-w-[86%] after:absolute after:inset-0 after:content-['']"
       >
         {ev.title}
       </Link>
       <div className="font-sans text-[12.5px] text-sub leading-relaxed md:max-w-[92%]">{ev.summary}</div>
 
       <div className="absolute top-[14px] right-4 text-right pointer-events-none">
-        <div className={cn("text-[19px] font-extrabold leading-none tabular-nums", scoreColor(ev.priority))} title="Importance, 0 to 100">{ev.importance}</div>
+        <div className={cn("text-[19px] font-extrabold leading-none tabular-nums", scoreColor(ev.priority))}>{ev.importance}</div>
+        <div className="font-sans text-[12px] text-muted mt-1">importance</div>
       </div>
 
       <div className="flex items-center justify-between mt-3">
