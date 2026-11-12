@@ -27,7 +27,7 @@ export default async function ThemeView({ params }: { params: { id: string } }) 
       <div className="px-4 md:px-[26px] py-[18px]">
         <Crumbs items={[{ href: "/themes", label: "Themes" }, { label: t.name }]} />
 
-        <div className="flex items-center justify-between bg-card border border-line rounded-[10px] px-5 py-[18px] mb-4">
+        <div className="flex items-center justify-between gap-4 bg-card border border-line rounded-[10px] px-5 py-[18px] mb-4">
           <div>
             <div className="text-[26px] font-extrabold text-theme">{t.name}</div>
             <div className="text-[12px] text-muted mt-0.5">{t.eventsToday} event{t.eventsToday === 1 ? "" : "s"} today{showHeat ? ` · ${t.heat} / 100 heat` : ""}</div>

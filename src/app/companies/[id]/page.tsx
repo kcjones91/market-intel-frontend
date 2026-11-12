@@ -26,7 +26,7 @@ export default async function CompanyView({ params }: { params: { id: string } }
       <div className="px-4 md:px-[26px] py-[18px]">
         <Crumbs items={[{ href: "/companies", label: "Companies" }, { label }]} />
 
-        <div className="flex items-center justify-between bg-card border border-line rounded-[10px] px-5 py-[18px] mb-4">
+        <div className="flex items-center justify-between gap-4 bg-card border border-line rounded-[10px] px-5 py-[18px] mb-4">
           <div>
             <div className="text-[26px] font-extrabold">{label}</div>
             <div className="text-[12px] text-muted mt-0.5">{c.name} · {c.sector} · {c.watched ? "on watchlist" : "not watched"}</div>

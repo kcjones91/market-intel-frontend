@@ -8,7 +8,10 @@ export function OpenOnHash({ id }: { id: string }) {
     const open = () => {
       if (window.location.hash !== `#${id}`) return;
       const el = document.getElementById(id);
-      if (el instanceof HTMLDetailsElement) el.open = true;
+      if (!(el instanceof HTMLDetailsElement)) return;
+      el.open = true;
+      // The browser scrolled before the section opened and the page grew; bring the heading back to the top.
+      el.scrollIntoView({ block: "start" });
     };
     // A second tap on the same link changes no hash, so listen for the tap itself as well.
     const onClick = (e: MouseEvent) => {

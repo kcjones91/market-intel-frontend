@@ -40,3 +40,4 @@ body { overflow-x: clip; }
 /* the "?" definition sheet (components/Help.tsx) */
 .help-sheet { max-height: 85vh; overflow-y: auto; }
 .help-sheet:not([open]) { display: none; }
+html:has(.help-sheet[open]) { overflow: hidden; }   /* the page does not scroll behind an open sheet */

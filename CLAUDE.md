@@ -87,7 +87,9 @@ they run with fresh context so the work is not grading itself.
 - Backend stores the Congress data API address as `docUrl`; `src/lib/links.ts` maps it to the
   public bill page at render time, and links only to the hosts listed there. Fix at the source in the Congress worker, then backfill.
 - Ask the Analyst is removed until it works. Reports and World Events are out of the nav.
-  Still dead on Alerts: "+ New rule", rule toggles. Watch stars are not toggles.
+  Alerts: the live page shows a "not switched on yet" notice (`ALERTS_ARE_LIVE` in
+  `src/app/alerts/page.tsx`) because the only rules and firings in the backend are seed rows.
+  In sample mode "+ New rule" and the rule toggles are still dead. Watch stars are not toggles.
 - Graph is hard to read on phones. Tags and breadcrumb links are under the 40px touch target.
 - UI second pass: heat still uses the gain colour, internal ids in breadcrumbs, price formatting.
 - Heat is hidden on live pages (`src/lib/heat.ts`): the backend has no job that calculates it and
