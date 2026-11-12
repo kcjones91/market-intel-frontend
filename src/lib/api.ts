@@ -64,7 +64,7 @@ async function request<T>(path: string, init?: RequestInit, notFoundIsNull = fal
 
   let res: Response;
   try {
-    res = await fetch(url, { ...init, cache: "no-store" });
+    res = await fetch(url, { ...init, cache: "no-store", signal: AbortSignal.timeout(10_000) });
   } catch {
     throw new ApiError(`API unreachable: ${path}`);
   }

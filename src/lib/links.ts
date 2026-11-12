@@ -4,21 +4,28 @@
 // items that is the data API (api.congress.gov/v3/...), which answers only
 // with an API key and returns JSON, so it must never be shown as a reader
 // link. Bills and resolutions map cleanly to their public congress.gov page.
-// Anything on an API host that cannot be mapped gets no link at all.
+//
+// Stored addresses are untrusted. A link is rendered only for an http(s)
+// address, with no embedded credentials, on a host readers should be sent to
+// (see READER_HOST below). Everything else is shown as plain text.
 
-const BILL_SLUGS: Record<string, string> = {
-  hr: "house-bill",
-  s: "senate-bill",
-  hjres: "house-joint-resolution",
-  sjres: "senate-joint-resolution",
-  hconres: "house-concurrent-resolution",
-  sconres: "senate-concurrent-resolution",
-  hres: "house-resolution",
-  sres: "senate-resolution",
-};
+const BILL_SLUGS = new Map<string, string>([
+  ["hr", "house-bill"],
+  ["s", "senate-bill"],
+  ["hjres", "house-joint-resolution"],
+  ["sjres", "senate-joint-resolution"],
+  ["hconres", "house-concurrent-resolution"],
+  ["sconres", "senate-concurrent-resolution"],
+  ["hres", "house-resolution"],
+  ["sres", "senate-resolution"],
+]);
 
 // Hosts that serve machine data, not pages for readers.
 const API_HOSTS = new Set(["api.congress.gov", "data.sec.gov", "api.govinfo.gov", "api.federalregister.gov"]);
+
+// The app's sources are US government publishers, so reader links go to .gov
+// sites only. Add a host here deliberately when a new source needs one.
+const READER_HOST = /\.gov$/;
 
 export function ordinal(n: number): string {
   const tens = n % 100;
@@ -27,20 +34,32 @@ export function ordinal(n: number): string {
   return `${n}${last === 1 ? "st" : last === 2 ? "nd" : last === 3 ? "rd" : "th"}`;
 }
 
+const wholeNumber = (s: string, max: number): number | null => {
+  if (!/^\d{1,6}$/.test(s)) return null;
+  const n = Number(s);
+  return n >= 1 && n <= max ? n : null;
+};
+
 /** Public congress.gov page for a bill or resolution, or null if the parts are not valid. */
 export function congressBillUrl(congress: string, type: string, number: string): string | null {
-  const slug = BILL_SLUGS[type.toLowerCase()];
-  const c = Number(congress);
-  const n = Number(number);
-  if (!slug || !Number.isInteger(c) || c < 1 || !Number.isInteger(n) || n < 1) return null;
+  const slug = BILL_SLUGS.get(type.toLowerCase());
+  const c = wholeNumber(congress, 999);
+  const n = wholeNumber(number, 99999);
+  if (!slug || c === null || n === null) return null;
   return `https://www.congress.gov/bill/${ordinal(c)}-congress/${slug}/${n}`;
 }
 
 export interface SourceLink {
-  /** Address to open, or null when there is nothing a reader can open. */
+  /** Address to open, or null when there is nothing a reader should open. */
   href: string | null;
   /** Short text to show for the source. */
   label: string;
+}
+
+const pretty = (u: URL) => (u.hostname.replace(/^www\./, "") + u.pathname).replace(/\/$/, "");
+
+function linkTo(href: string): SourceLink {
+  return { href, label: pretty(new URL(href)) };
 }
 
 /**
@@ -48,33 +67,32 @@ export interface SourceLink {
  * @param eventId the event id, used as a fallback for Congress items ("congress:119:hr:10006")
  */
 export function sourceLink(docUrl: string | null | undefined, eventId?: string): SourceLink {
-  const raw = (docUrl ?? "").trim();
+  const raw = (docUrl ?? "").trim().slice(0, 2000);
 
-  // Congress bill, from the API address.
-  const api = raw.match(/^https?:\/\/api\.congress\.gov\/v\d+\/bill\/(\d+)\/([a-z]+)\/(\d+)(?:[/?#]|$)/i);
-  if (api) {
-    const href = congressBillUrl(api[1], api[2], api[3]);
-    if (href) return { href, label: href.replace(/^https:\/\/www\./, "") };
-  }
-
-  let host = "";
-  let web = false;
+  let u: URL | null = null;
   try {
-    const u = new URL(raw);
-    host = u.hostname.toLowerCase();
-    web = u.protocol === "http:" || u.protocol === "https:";
+    u = new URL(raw);
   } catch {
-    // not an absolute URL (mock data uses bare strings such as "sec.gov/edgar/RKLB/8-K")
+    // not an absolute URL (sample data uses bare strings such as "sec.gov/edgar/RKLB/8-K")
   }
+  if (!u) return { href: null, label: raw };
 
-  if (web && API_HOSTS.has(host)) {
-    // Fall back to the event id for Congress items the pattern above did not match.
-    const id = (eventId ?? "").match(/^congress:(\d+):([a-z]+):(\d+)$/i);
-    const href = id ? congressBillUrl(id[1], id[2], id[3]) : null;
-    if (href) return { href, label: href.replace(/^https:\/\/www\./, "") };
+  const host = u.hostname.toLowerCase().replace(/\.$/, "");
+  const web = u.protocol === "http:" || u.protocol === "https:";
+  const clean = web && !u.username && !u.password;
+  if (!clean) return { href: null, label: host || raw };
+
+  if (API_HOSTS.has(host)) {
+    // Congress bill, from the API address, then from the event id.
+    const fromUrl = host === "api.congress.gov" ? u.pathname.match(/^\/v\d+\/bill\/(\d+)\/([a-z]+)\/(\d+)\/?$/i) : null;
+    const fromId = (eventId ?? "").match(/^congress:(\d+):([a-z]+):(\d+)$/i);
+    for (const m of [fromUrl, fromId]) {
+      const href = m ? congressBillUrl(m[1], m[2], m[3]) : null;
+      if (href) return linkTo(href);
+    }
     return { href: null, label: host.replace(/^(api|data)\./, "") };
   }
 
-  if (web) return { href: raw, label: raw.replace(/^https?:\/\/(www\.)?/, "") };
-  return { href: null, label: raw };
+  if (READER_HOST.test(host)) return { href: u.href, label: pretty(u) };
+  return { href: null, label: pretty(u) };
 }
