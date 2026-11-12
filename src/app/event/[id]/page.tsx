@@ -5,6 +5,7 @@ import { ContextRail } from "@/components/ContextRail";
 import { Crumbs, TickerTag, ThemeTag } from "@/components/ui";
 import { eventById, events as mockEvents } from "@/data/mock";
 import { api, apiEnabled } from "@/lib/api";
+import { sourceLink } from "@/lib/links";
 
 export default async function EventView({ params }: { params: { id: string } }) {
   const id = decodeURIComponent(params.id);
@@ -20,7 +21,8 @@ export default async function EventView({ params }: { params: { id: string } }) 
         (x) => x.id !== ev.id && (x.companies.some((c) => ev.companies.includes(c)) || x.themes.some((t) => ev.themes.includes(t)))
       );
 
-  const isUrl = /^https?:\/\//i.test(ev.docUrl ?? "");
+  // The stored address can be a data API endpoint; turn it into a page a reader can open.
+  const source = sourceLink(ev.docUrl, ev.id);
 
   const rail = (
     <ContextRail
@@ -62,13 +64,11 @@ export default async function EventView({ params }: { params: { id: string } }) 
             ))}
           </div>
 
-          {ev.docUrl && (
-            isUrl ? (
-              <a href={ev.docUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-info text-[12px] mt-4 hover:underline break-all">↗ View source document · {ev.docUrl}</a>
-            ) : (
-              <div className="inline-flex items-center gap-1.5 text-info text-[12px] mt-4 break-all">↗ Source document · {ev.docUrl}</div>
-            )
-          )}
+          {source.href ? (
+            <a href={source.href} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-info text-[12px] mt-4 hover:underline break-all">↗ View source document · {source.label}</a>
+          ) : source.label ? (
+            <div className="inline-flex items-center gap-1.5 text-muted text-[12px] mt-4 break-all">Source · {source.label}</div>
+          ) : null}
 
           <Section label="Related Events" />
           <div className="flex flex-col gap-2">

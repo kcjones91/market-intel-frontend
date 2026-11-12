@@ -72,6 +72,8 @@ the work is not grading itself.
 
 - No tests. First candidates: `src/lib/api.ts` return contract, the alerts normaliser, graph layout.
 - `npm audit --omit=dev` reports Next.js advisories whose fix is a major upgrade (14 to 16).
+- Backend stores the Congress data API address as `docUrl`; `src/lib/links.ts` maps it to the
+  public bill page at render time. Fix at the source in the Congress worker, then backfill.
 - Not functional yet: Ask the Analyst, "+ New rule", Reports, World Events.
 - Graph is hard to read on phones; search example chips are 26px tall (under the 40px target).
 - `build.yml` still uses `actions/checkout@v4`; `check.yml` uses v7.
