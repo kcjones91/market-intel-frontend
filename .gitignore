@@ -6,3 +6,5 @@ out/
 *.tsbuildinfo
 ui-smoke/
 server.log
+__pycache__/
+*.pyc
