@@ -75,8 +75,12 @@ change the image tag in `k8s-applications/apps/market-intel/03-frontend.yaml`, c
 - `security-review`: dependency audit plus the diff against the trust boundaries.
 - `ui-design`: runs before code on anything a reader sees. Phone first; returns a short spec
   (layout, interactions, states, copy) that the main session builds and `ui-qa` checks against.
+- `finance-review`: reads copy, labels, colours on numbers and the glossary for anything that
+  reads as advice, a prediction or a rating, and for sample values shown as live ones.
+- `release-check` lives in `k8s-applications/.claude/agents/`. Run it before any release that
+  touches more than one repo: it checks tags, pins and pipeline steps and writes out the order.
 
-Only the main session writes code. `ui-design` specifies, the other three review and report;
+Only the main session writes code. `ui-design` specifies, the others review and report;
 they run with fresh context so the work is not grading itself.
 
 ## Open items (keep short, prune when done)
