@@ -35,7 +35,7 @@ export default async function CompanyView({ params }: { params: { id: string } }
           {showHeat ? (
             <div className="text-right">
               <div className="text-[30px] font-extrabold text-pos">{c.heat}</div>
-              <div className="text-[12px] tracking-wide text-muted whitespace-nowrap">HEAT · {c.heatTrend.length}D <Help term="heat" /></div>
+              <div className="text-[12px] tracking-wide text-muted whitespace-nowrap">HEAT · 7D <Help term="heat" /></div>
             </div>
           ) : (
             <div className="text-right">

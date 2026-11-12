@@ -52,7 +52,7 @@ export function ContextRail() {
     return () => { cancelled = true; mq.removeEventListener("change", load); };
   }, []);
 
-  // Live heat is not calculated yet (see lib/heat.ts): without it the panel lists by events today.
+  // Where heat is not shown (see lib/heat.ts) the panel lists by events today.
   const showHeat = heatVisible(data?.live ?? true);
   const watched = (data?.companies ?? []).filter((c) => c.watched).sort(showHeat ? (a, b) => b.heat - a.heat : byActivity);
   const heatThemes = [...(data?.themes ?? [])].sort(showHeat ? (a, b) => b.heat - a.heat : byActivity).slice(0, 5);

@@ -1,14 +1,14 @@
-// Heat is meant to be a 0 to 100 activity score per company and theme, written
-// nightly by the backend. That job does not exist yet: the heat rows in the
-// live database are the seed rows from the day it was set up, so they are
-// sample values with a real-looking date.
+// Heat is a 0 to 100 activity score per company and theme. The backend's nightly
+// heat job (app/workers/heat.py, backend v0.2.8 and later) calculates it from
+// stored events and rewrites the last 12 days on every run. Its first run is what
+// removes the seed rows the database was set up with.
 //
-// Sample data never appears as live data, so live pages do not show heat until
-// the backend calculates it. Sample mode (no API configured) still shows it,
-// under the site-wide SAMPLE DATA marker.
-//
-// Set this to true in the release that ships the backend heat job.
-export const HEAT_IS_CALCULATED = false;
+// Sample data never appears as live data. This switch is true because the live
+// backend runs that job. Do not deploy a build with it set to true against a
+// backend whose heat job has not run: the stored rows would be seed values.
+// Sample mode (no API configured) shows heat either way, under the site-wide
+// SAMPLE DATA marker.
+export const HEAT_IS_CALCULATED = true;
 
 /** `live` is true when the page's data came from the API rather than the bundled sample data. */
 export function heatVisible(live: boolean): boolean {
