@@ -5,7 +5,8 @@ handoff doc or chat summary that disagrees with this file or with `git log` is s
 
 ## Source of truth
 
-- Code: this repo, `main`. A version is a git tag `vX.Y.Z`. Current release: `v0.1.2`.
+- Code: this repo, `main`. A version is a git tag `vX.Y.Z`. The current release is the
+  newest tag (`git tag --sort=-v:refname | head -1`); the version that is live is the pin below.
 - Deploy: a pushed tag runs `.github/workflows/build.yml`, which builds, smoke-tests and pushes
   `ghcr.io/kcjones91/market-intel-frontend:<tag>`. The running version is the tag pinned in
   `kcjones91/k8s-applications` at `apps/market-intel/03-frontend.yaml`; ArgoCD syncs it to
@@ -50,6 +51,8 @@ separate pipeline. `WIRING.md` has the view to endpoint map.
   `src/app/globals.css`. Type sizes and spacing are inline Tailwind values, with no scale file
   yet. One dark theme only. Minimum text size is 12px. Greys: `sub` and `muted` for text,
   `faint` for separators only. `neg` and `pos` mean loss and gain; importance never uses `neg`.
+- Every term a reader sees (a score, a label) has one definition in `src/lib/glossary.ts`, shown
+  by the `Help` component ("?"). Do not explain a term in page copy; add or edit the entry.
 
 ## How changes ship
 
@@ -70,9 +73,11 @@ change the image tag in `k8s-applications/apps/market-intel/03-frontend.yaml`, c
 - `test-qa`: reviews diffs for untested paths and fragile tests; runs typecheck and build.
 - `ui-qa`: runs `scripts/ui_smoke.py` (390 and 1440, both colour schemes), reviews screenshots.
 - `security-review`: dependency audit plus the diff against the trust boundaries.
+- `ui-design`: runs before code on anything a reader sees. Phone first; returns a short spec
+  (layout, interactions, states, copy) that the main session builds and `ui-qa` checks against.
 
-Only the main session writes code. Agents review and report; they run with fresh context so
-the work is not grading itself.
+Only the main session writes code. `ui-design` specifies, the other three review and report;
+they run with fresh context so the work is not grading itself.
 
 ## Open items (keep short, prune when done)
 
@@ -82,9 +87,14 @@ the work is not grading itself.
 - Backend stores the Congress data API address as `docUrl`; `src/lib/links.ts` maps it to the
   public bill page at render time, and links only to the hosts listed there. Fix at the source in the Congress worker, then backfill.
 - Ask the Analyst is removed until it works. Reports and World Events are out of the nav.
-  Still dead on Alerts: "+ New rule", rule toggles. Watch stars are not toggles.
+  Alerts: the live page shows a "not switched on yet" notice (`ALERTS_ARE_LIVE` in
+  `src/app/alerts/page.tsx`) because the only rules and firings in the backend are seed rows.
+  In sample mode "+ New rule" and the rule toggles are still dead. Watch stars are not toggles.
 - Graph is hard to read on phones. Tags and breadcrumb links are under the 40px touch target.
 - UI second pass: heat still uses the gain colour, internal ids in breadcrumbs, price formatting.
+- Heat is hidden on live pages (`src/lib/heat.ts`): the backend has no job that calculates it and
+  the stored rows are seed data. When the backend heat job ships, set `HEAT_IS_CALCULATED` to
+  true and rewrite the heat entry in the glossary to describe the real formula.
 - `build.yml` still uses `actions/checkout@v4`; `check.yml` uses v7.
 - Cloudflare: move munnymoves.com to its own Cloudflare account, with its own login branding.
 - Stage 2: per-reader watchlists and alerts, identity from the Cloudflare Access header.

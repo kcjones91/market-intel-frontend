@@ -5,6 +5,8 @@ import { PageHead, EventCard } from "@/components/ui";
 import { events as mockEvents, quotes as mockQuotes } from "@/data/mock";
 import { api, type Quote } from "@/lib/api";
 import type { IntelEvent } from "@/lib/types";
+import { Help } from "@/components/Help";
+import { OpenOnHash } from "@/components/OpenOnHash";
 
 // Server component: live data when an API is configured, bundled mock data otherwise.
 export default async function Dashboard() {
@@ -39,6 +41,15 @@ export default async function Dashboard() {
         <PageHead title="Today's Intelligence" stamp={stamp} />
         {ingest && <div className="text-[12px] text-sub mt-1.5">{ingest}</div>}
 
+        {/* At a glance: how many events at each priority, each count jumps to its section. */}
+        {!empty && (
+          <nav aria-label="Today at a glance" className="grid grid-cols-3 gap-2 mt-4">
+            <Count href="#high" n={high.length} label="High" tone="text-amber" />
+            <Count href="#med" n={med.length} label="Medium" tone="text-ink" />
+            <Count href="#low" n={low.length} label="Low" tone="text-muted" />
+          </nav>
+        )}
+
         {quotes.length > 0 && (
           <div className="flex bg-card border border-line rounded-lg my-5 overflow-x-auto no-scrollbar">
             {quotes.map((q) => (
@@ -52,26 +63,57 @@ export default async function Dashboard() {
 
         {empty && <div className="text-muted text-[12.5px] py-10 text-center">No events ingested yet today.</div>}
 
-        {high.length > 0 && <><Prio dot="#f59e0b" label="High Priority" />{high.map((e) => <EventCard key={e.id} ev={e} />)}</>}
-        {med.length > 0 && <><Prio dot="#a3a3a3" label="Medium Priority" />{med.map((e) => <EventCard key={e.id} ev={e} />)}</>}
-        {low.length > 0 && <><Prio dot="#6e6e6e" label="Low Priority" />{low.map((e) => <EventCard key={e.id} ev={e} />)}</>}
-
+        {/* How to read a card, before the cards rather than after the last one. */}
         {!empty && (
-          <p className="font-sans text-[12px] text-muted leading-relaxed mt-4 max-w-[640px]">
-            The number on each card is its importance from 0 to 100: how much the event matters to the tracked themes.
-            Confidence is how sure the scoring model is. Scores are produced by an automated model.
-          </p>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2.5 font-sans text-[12px] text-muted mt-4">
+            <span>Each event is scored by an automated model.</span>
+            <span className="text-sub whitespace-nowrap">Importance <Help term="importance" /></span>
+            <span className="text-sub whitespace-nowrap">Confidence <Help term="confidence" /></span>
+            <span className="text-sub whitespace-nowrap">Priority <Help term="priority" /></span>
+          </div>
+        )}
+
+        {high.length > 0 && <><Prio id="high" dot="#f59e0b" label="High Priority" n={high.length} />{high.map((e) => <EventCard key={e.id} ev={e} />)}</>}
+        {med.length > 0 && <><Prio id="med" dot="#a3a3a3" label="Medium Priority" n={med.length} />{med.map((e) => <EventCard key={e.id} ev={e} />)}</>}
+
+        {/* Low priority is the long tail: folded away unless it is all there is. */}
+        {low.length > 0 && <OpenOnHash id="low" />}
+        {low.length > 0 && (
+          <details id="low" className="fold scroll-mt-[104px] md:scroll-mt-4 mt-[18px]" open={high.length + med.length === 0}>
+            <summary className="flex items-center gap-2 min-h-[44px] cursor-pointer text-[12px] tracking-[0.15em] text-sub uppercase rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-mint">
+              <span className="w-[7px] h-[7px] rounded-full" style={{ background: "#6e6e6e" }} />
+              <h2 className="font-normal">Low Priority</h2>
+              <span className="text-muted tabular-nums">{low.length}</span>
+              <span className="fold-closed ml-auto text-muted normal-case tracking-normal">Show</span>
+              <span className="fold-open ml-auto text-muted normal-case tracking-normal">Hide</span>
+            </summary>
+            <div className="mt-1">{low.map((e) => <EventCard key={e.id} ev={e} />)}</div>
+          </details>
         )}
       </div>
     </ViewFrame>
   );
 }
 
-function Prio({ dot, label }: { dot: string; label: string }) {
+// The scroll margin clears the nav, which is pinned to the top on phones.
+function Prio({ id, dot, label, n }: { id: string; dot: string; label: string; n: number }) {
   return (
-    <div className="flex items-center gap-2 text-[12px] tracking-[0.15em] text-sub uppercase mt-[18px] mb-3">
+    <h2 id={id} className="flex items-center gap-2 text-[12px] font-normal tracking-[0.15em] text-sub uppercase mt-[18px] mb-3 scroll-mt-[104px] md:scroll-mt-4">
       <span className="w-[7px] h-[7px] rounded-full" style={{ background: dot }} />
       {label}
-    </div>
+      <span className="text-muted tabular-nums">{n}</span>
+    </h2>
   );
+}
+
+function Count({ href, n, label, tone }: { href: string; n: number; label: string; tone: string }) {
+  const inner = (
+    <>
+      <span className={`text-[20px] font-extrabold leading-none tabular-nums ${n ? tone : "text-muted"}`}>{n}</span>
+      <span className="text-[12px] tracking-[0.08em] text-muted uppercase mt-1.5">{label}</span>
+    </>
+  );
+  const box = "flex flex-col items-start justify-center min-h-[56px] px-3.5 py-2 bg-card border border-line rounded-lg";
+  // Nothing to jump to when the count is zero.
+  return n ? <a href={href} aria-label={`${n} ${label.toLowerCase()} priority, jump to section`} className={`${box} hover:border-[#333] focus-visible:outline focus-visible:outline-2 focus-visible:outline-mint`}>{inner}</a> : <div className={box}>{inner}</div>;
 }

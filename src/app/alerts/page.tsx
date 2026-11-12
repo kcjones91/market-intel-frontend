@@ -7,12 +7,35 @@ import { api } from "@/lib/api";
 
 const channelColor: Record<string, string> = { discord: "#8a93ff", slack: "#36C5F0", email: "#a3a3a3", telegram: "#229ED9" };
 
+// Nothing in the backend evaluates alert rules yet: the only rules and firings in the live
+// database are the seed rows, so showing them would present sample data as live. Live pages
+// say so instead. Set this to true in the release that ships working alerts.
+const ALERTS_ARE_LIVE = false;
+
 export default async function Alerts() {
   const data = await api.alerts();
+  const rail = <ContextRail />;
+
+  if (data && !ALERTS_ARE_LIVE) {
+    return (
+      <ViewFrame rail={rail}>
+        <div className="px-4 md:px-[26px] py-[18px]">
+          <Crumbs items={[{ label: "Alerts" }]} />
+          <PageHead title="Alerts" />
+          <div className="bg-card border border-line rounded-[9px] px-4 py-5 mt-5 font-sans max-w-[640px]">
+            <div className="text-[14px] font-semibold">Alerts are not switched on yet.</div>
+            <p className="text-[13px] text-sub leading-relaxed mt-1.5">
+              When they are, you will be able to choose companies and themes to follow and be told when something important happens.
+              Until then, the Dashboard shows everything new each morning.
+            </p>
+          </div>
+        </div>
+      </ViewFrame>
+    );
+  }
+
   const triggeredAlerts = data ? data.triggered : mockTriggered;
   const alertRules = data ? data.rules : mockRules;
-
-  const rail = <ContextRail />;
 
   return (
     <ViewFrame rail={rail}>

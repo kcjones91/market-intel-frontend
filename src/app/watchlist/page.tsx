@@ -4,20 +4,22 @@ import { ContextRail } from "@/components/ContextRail";
 import { PageHead, Crumbs } from "@/components/ui";
 import { companies as mockCompanies, events as mockEvents } from "@/data/mock";
 import { api, allEvents } from "@/lib/api";
+import { heatVisible, byActivity } from "@/lib/heat";
 
 export default async function Watchlist() {
   const [live, today] = await Promise.all([api.companies(), api.today()]);
   const companies = live ?? mockCompanies;
   const events = live ? allEvents(today) : mockEvents;
 
-  const watched = companies.filter((c) => c.watched).sort((a, b) => b.heat - a.heat);
+  const showHeat = heatVisible(live !== null);
+  const watched = companies.filter((c) => c.watched).sort(showHeat ? (a, b) => b.heat - a.heat : byActivity);
   const rail = <ContextRail />;
 
   return (
     <ViewFrame rail={rail}>
       <div className="px-4 md:px-[26px] py-[18px]">
         <Crumbs items={[{ label: "Watchlist" }]} />
-        <PageHead title="Watchlist" stamp={`${watched.length} NAME${watched.length === 1 ? "" : "S"} · BY HEAT`} />
+        <PageHead title="Watchlist" stamp={`${watched.length} NAME${watched.length === 1 ? "" : "S"} · ${showHeat ? "BY HEAT" : "BY EVENTS TODAY"}`} />
         <div className="h-4" />
         {watched.length === 0 && <div className="text-muted text-[12.5px] py-10 text-center">No companies on the watchlist.</div>}
         {watched.map((c) => {
@@ -29,9 +31,9 @@ export default async function Watchlist() {
                   <span className="text-[15px] font-bold text-pos">{c.ticker ?? c.name}</span>
                   <span className="text-[12px] text-muted">{c.name} · {c.sector}</span>
                 </div>
-                <div className="text-[16px] font-extrabold" style={{ color: c.heat >= 80 ? "#22c55e" : c.heat >= 60 ? "#f59e0b" : "#a3a3a3" }}>{c.heat}</div>
+                {showHeat && <div className="text-[16px] font-extrabold" style={{ color: c.heat >= 80 ? "#22c55e" : c.heat >= 60 ? "#f59e0b" : "#a3a3a3" }}>{c.heat}</div>}
               </div>
-              <div className="h-[5px] bg-line rounded overflow-hidden mb-2"><div className="h-full bg-mint/80" style={{ width: `${c.heat}%` }} /></div>
+              {showHeat && <div className="h-[5px] bg-line rounded overflow-hidden mb-2"><div className="h-full bg-mint/80" style={{ width: `${c.heat}%` }} /></div>}
               <div className="text-[12px] text-muted">
                 {c.eventsToday ? `${c.eventsToday} event${c.eventsToday === 1 ? "" : "s"} today` : "no events today"}
                 {recent.length ? " · " + recent.map((e) => e.title.split(" ").slice(0, 5).join(" ")).join(" · ") : ""}
