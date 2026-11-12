@@ -52,7 +52,7 @@ export const events: IntelEvent[] = [
     docUrl:"sec.gov/edgar/RKLB/8-K" },
   { id:"e3", source:"FED_REGISTER", sourceLabel:"FED REGISTER", docType:"FUNDING NOTICE", priority:"high", importance:86, confidence:76, time:"04:30", date:"2026-06-15",
     title:"DOE opens $500M solicitation for fusion pilot programs",
-    summary:"Milestone-based funding structure favors firms with existing demos. Application window 90 days — watch for partnership announcements as the deadline nears.",
+    summary:"Milestone-based funding structure favors firms with existing demos. Application window 90 days; watch for partnership announcements as the deadline nears.",
     companies:[], themes:["energy","fusion"],
     entities:[{kind:"govbody",id:"doe-fusion",label:"DOE-2026-0142"}],
     docUrl:"federalregister.gov/DOE-2026-0142" },
