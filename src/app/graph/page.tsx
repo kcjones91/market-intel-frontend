@@ -42,6 +42,9 @@ function layout(nodes: GraphNode[]): { pos: Record<string, Pt>; height: number }
   return { pos, height };
 }
 
+const NO_NODES: GraphNode[] = [];
+const NO_EDGES: Edge[] = [];
+
 export default function Graph() {
   const router = useRouter();
   const [focus, setFocus] = useState<string | null>(null);
@@ -61,13 +64,13 @@ export default function Graph() {
     return () => { cancelled = true; };
   }, []);
 
-  const nodes = graph?.nodes ?? [];
-  const edges = graph?.edges ?? [];
+  const nodes = graph?.nodes ?? NO_NODES;
+  const edges = graph?.edges ?? NO_EDGES;
   const { pos, height } = useMemo(() => layout(nodes), [nodes]);
   const ids = useMemo(() => new Set(nodes.map((n) => n.id)), [nodes]);
 
   const neighbors = focus
-    ? new Set(edges.filter((e) => e.a === focus || e.b === focus).flatMap((e) => [e.a, e.b]))
+    ? new Set([focus, ...edges.filter((e) => (e.a === focus || e.b === focus) && ids.has(e.a) && ids.has(e.b)).flatMap((e) => [e.a, e.b])])
     : null;
 
   const rail = <ContextRail />;

@@ -19,9 +19,12 @@ const PRIMARY: Item[] = [
   { href: "/alerts", label: "Alerts" },
 ];
 
-function isActive(path: string, it: Item) {
-  if (it.href === "/") return path === "/" || (it.also ?? []).some((p) => path.startsWith(p));
-  return path.startsWith(it.href);
+// Matches a whole path segment, so "/themes" matches "/themes/x" but not "/themes-foo".
+const under = (path: string, base: string) => path === base || path.startsWith(base + "/");
+
+export function isActive(path: string, it: Item) {
+  if (it.href === "/") return path === "/" || (it.also ?? []).some((p) => under(path, p));
+  return under(path, it.href);
 }
 
 export function Nav() {
@@ -35,7 +38,10 @@ export function Nav() {
     const el = row.current;
     const active = el?.querySelector<HTMLElement>('[aria-current="page"]');
     if (!el || !active || el.scrollWidth <= el.clientWidth) return;
-    const target = active.offsetLeft - (el.clientWidth - active.offsetWidth) / 2;
+    // Measure against the row itself so this stays right if the nav's own layout changes.
+    const a = active.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    const target = el.scrollLeft + (a.left - r.left) - (el.clientWidth - a.width) / 2;
     el.scrollLeft = Math.max(0, Math.min(target, el.scrollWidth - el.clientWidth));
   }, [path]);
 

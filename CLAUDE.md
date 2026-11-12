@@ -11,11 +11,11 @@ handoff doc or chat summary that disagrees with this file or with `git log` is s
   `kcjones91/k8s-applications` at `apps/market-intel/03-frontend.yaml`; ArgoCD syncs it to
   swipe-lab (namespace `market-intel`, Deployment `intel-web`).
 - Live: https://intel.munnymoves.com, behind Cloudflare Access (email one-time PIN, allow list).
-  Also NodePort 30840 on any swipe-lab node, LAN and Tailscale only, no login.
+  It is also served inside the home network and tailnet; details are in `k8s-applications`.
   Which build is serving:
   `kubectl -n market-intel get deploy intel-web -o jsonpath='{.spec.template.spec.containers[0].image}'`
 - Kyle's clones (WSL): `/mnt/c/Users/kjon5/projects/market-intel-frontend` and
-  `/mnt/c/engex/code/k8s-applications`. kubectl and argocd run on `swipe-master-1`.
+  `/mnt/c/engex/code/k8s-applications`. kubectl and argocd run on the cluster's control node.
 
 ## Architecture in one paragraph
 
@@ -24,7 +24,8 @@ rendered per request (`dynamic = "force-dynamic"` in the root layout). Server vi
 FastAPI backend (`kcjones91/market-intel-backend`, Service `intel-api`) using `API_INTERNAL_URL`,
 read at runtime. Browser views (Search, Graph, the context rail) call same-origin `/api/*`, which
 `src/app/api/[...path]/route.ts` forwards to the backend (GET and POST only). `src/lib/api.ts`
-returns data, `null` (no API configured, or 404) or throws (API configured but failing). Mock data
+returns data, `null` (no API configured; also a 404 on a single-record call) or throws (API
+configured but failing, including a 404 on a list endpoint). Mock data
 in `src/data/mock.ts` renders only when no API is configured, under a site-wide SAMPLE DATA banner;
 a failing API shows an error, never mock. No auth in the app itself: Cloudflare Access is the gate. The backend ingests Congress.gov
 and SEC EDGAR nightly and scores events with a local LLM. The Munny Moves newsletter is a
@@ -83,5 +84,5 @@ the work is not grading itself.
 - Graph is hard to read on phones. Tags and breadcrumb links are under the 40px touch target.
 - UI second pass: heat still uses the gain colour, internal ids in breadcrumbs, price formatting.
 - `build.yml` still uses `actions/checkout@v4`; `check.yml` uses v7.
-- Cloudflare: move munnymoves.com to its own account so readers do not see Kinesics branding.
+- Cloudflare: move munnymoves.com to its own Cloudflare account, with its own login branding.
 - Stage 2: per-reader watchlists and alerts, identity from the Cloudflare Access header.
