@@ -4,7 +4,7 @@ import Link from "next/link";
 import { companies as mockCompanies, themes as mockThemes } from "@/data/mock";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
-import { heatVisible, byActivity } from "@/lib/heat";
+import { heatVisible, byActivity, byHeat } from "@/lib/heat";
 import { Help } from "@/components/Help";
 import type { Company, Theme } from "@/lib/types";
 
@@ -54,8 +54,8 @@ export function ContextRail() {
 
   // Where heat is not shown (see lib/heat.ts) the panel lists by events today.
   const showHeat = heatVisible(data?.live ?? true);
-  const watched = (data?.companies ?? []).filter((c) => c.watched).sort(showHeat ? (a, b) => b.heat - a.heat : byActivity);
-  const heatThemes = [...(data?.themes ?? [])].sort(showHeat ? (a, b) => b.heat - a.heat : byActivity).slice(0, 5);
+  const watched = (data?.companies ?? []).filter((c) => c.watched).sort(showHeat ? byHeat : byActivity);
+  const heatThemes = [...(data?.themes ?? [])].sort(showHeat ? byHeat : byActivity).slice(0, 5);
 
   return (
     <aside className="hidden lg:block border-l border-line h-screen sticky top-0 overflow-y-auto pane px-[18px] py-5">

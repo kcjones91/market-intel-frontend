@@ -4,13 +4,13 @@ import { ContextRail } from "@/components/ContextRail";
 import { PageHead, Crumbs } from "@/components/ui";
 import { companies as mockCompanies } from "@/data/mock";
 import { api } from "@/lib/api";
-import { heatVisible, byActivity } from "@/lib/heat";
+import { heatVisible, byActivity, byHeat } from "@/lib/heat";
 
 export default async function Companies() {
   const live = await api.companies();
   const companies = live ?? mockCompanies;
   const showHeat = heatVisible(live !== null);
-  const rows = [...companies].sort(showHeat ? (a, b) => b.heat - a.heat : byActivity);
+  const rows = [...companies].sort(showHeat ? byHeat : byActivity);
   const cols = showHeat
     ? "grid-cols-[1fr_48px_64px_56px] md:grid-cols-[1.4fr_1fr_70px_70px_60px]"
     : "grid-cols-[1fr_64px_56px] md:grid-cols-[1.4fr_1fr_70px_60px]";

@@ -4,7 +4,7 @@ import { ContextRail } from "@/components/ContextRail";
 import { PageHead, Crumbs } from "@/components/ui";
 import { companies as mockCompanies, events as mockEvents } from "@/data/mock";
 import { api, allEvents } from "@/lib/api";
-import { heatVisible, byActivity } from "@/lib/heat";
+import { heatVisible, byActivity, byHeat } from "@/lib/heat";
 
 export default async function Watchlist() {
   const [live, today] = await Promise.all([api.companies(), api.today()]);
@@ -12,7 +12,7 @@ export default async function Watchlist() {
   const events = live ? allEvents(today) : mockEvents;
 
   const showHeat = heatVisible(live !== null);
-  const watched = companies.filter((c) => c.watched).sort(showHeat ? (a, b) => b.heat - a.heat : byActivity);
+  const watched = companies.filter((c) => c.watched).sort(showHeat ? byHeat : byActivity);
   const rail = <ContextRail />;
 
   return (
